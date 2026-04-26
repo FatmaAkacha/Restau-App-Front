@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-brand-black">
+  <div class="min-h-screen" style="background:#F7F7F7">
 
     <!-- Loading -->
     <div v-if="store.loading" class="flex items-center justify-center h-screen">

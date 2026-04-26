@@ -1,14 +1,12 @@
 <template>
-  <div class="min-h-screen bg-brand-black">
+  <div class="min-h-screen" style="background:#F7F7F7">
 
-    <!-- Header -->
-    <header class="bg-brand-dark border-b border-brand-border px-4 py-4
-                   flex items-center gap-4 sticky top-0 z-20 backdrop-blur">
-      <router-link to="/menu"
-                   class="text-brand-muted hover:text-brand-red transition-colors text-sm flex items-center gap-1">
+    <header class="border-b px-4 py-4 flex items-center gap-4 sticky top-0 z-20"
+            style="background:#fff; border-color:#E5E5E5">
+      <router-link to="/menu" class="text-sm transition-colors hover:text-red-600" style="color:#888">
         ← Retour
       </router-link>
-      <h1 class="text-base font-bold text-white">Passer la commande</h1>
+      <h1 class="text-base font-bold" style="color:#1A1A1A">Passer la commande</h1>
     </header>
 
     <div class="max-w-3xl mx-auto px-4 py-6 space-y-4">
@@ -55,10 +53,10 @@
           <div class="flex gap-3 mt-4">
             <button v-for="t in ['delivery','pickup']" :key="t"
                     @click="form.type = t"
-                    :class="['flex-1 py-2.5 rounded-xl border text-sm font-semibold transition-all',
-                             form.type === t
-                               ? 'border-brand-red bg-brand-red/10 text-brand-red'
-                               : 'border-brand-border text-brand-muted hover:border-brand-muted']">
+                    class="flex-1 py-2.5 rounded-xl border text-sm font-semibold transition-all"
+                    :style="form.type === t
+                      ? 'border-color:#E8192C; background:#FFF0F1; color:#E8192C'
+                      : 'border-color:#E5E5E5; background:#fff; color:#888'">
               {{ t === 'delivery' ? '🚚 Livraison' : '🏃 À emporter' }}
             </button>
           </div>
@@ -93,21 +91,21 @@
           <div class="flex gap-3 mb-5">
             <button v-for="m in ['card','cash']" :key="m"
                     @click="paymentMethod = m"
-                    :class="['flex-1 py-2.5 rounded-xl border text-sm font-semibold transition-all',
-                             paymentMethod === m
-                               ? 'border-brand-red bg-brand-red/10 text-brand-red'
-                               : 'border-brand-border text-brand-muted hover:border-brand-muted']">
+                    class="flex-1 py-2.5 rounded-xl border text-sm font-semibold transition-all"
+                    :style="paymentMethod === m
+                      ? 'border-color:#E8192C; background:#FFF0F1; color:#E8192C'
+                      : 'border-color:#E5E5E5; background:#fff; color:#888'">
               {{ m === 'card' ? '💳 Payer par carte' : '💵 Espèces à la livraison' }}
             </button>
           </div>
 
           <div v-if="paymentMethod === 'card'">
-            <!-- Stripe card element styled for dark theme -->
-            <div id="card-element"
-                 class="bg-brand-dark border border-brand-border rounded-xl px-4 py-3.5" />
-            <p v-if="stripeError" class="text-brand-red text-xs mt-2">{{ stripeError }}</p>
+            <div id="card-element" class="rounded-xl px-4 py-3.5 border"
+                 style="background:#fff; border-color:#E5E5E5" />
+            <p v-if="stripeError" class="text-xs mt-2" style="color:#E8192C">{{ stripeError }}</p>
           </div>
-          <div v-else class="bg-brand-dark border border-brand-border rounded-xl p-4 text-sm text-brand-muted">
+          <div v-else class="rounded-xl p-4 text-sm border"
+               style="background:#FFF8F8; border-color:#FFCDD0; color:#888">
             💵 Payez en espèces à la réception de votre commande.
           </div>
         </div>

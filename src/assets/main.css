@@ -4,35 +4,64 @@
 
 @layer base {
   * { box-sizing: border-box; }
-  body { @apply font-sans text-white bg-brand-black; }
-  img  { @apply max-w-full; }
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    color: #1A1A1A;
+    background-color: #F7F7F7;
+  }
+  img { max-width: 100%; }
   ::-webkit-scrollbar { width: 4px; height: 4px; }
-  ::-webkit-scrollbar-track { background: #1C1C1C; }
+  ::-webkit-scrollbar-track { background: #F0F0F0; }
   ::-webkit-scrollbar-thumb { background: #E8192C; border-radius: 4px; }
 }
 
 @layer components {
   .btn-primary {
-    @apply bg-brand-red text-white font-bold px-6 py-3 rounded-xl
-           hover:bg-brand-redDark active:scale-95
-           transition-all duration-200
-           shadow-red-sm hover:shadow-red-glow
+    @apply font-bold px-6 py-3 rounded-xl
+           active:scale-95 transition-all duration-200
            disabled:opacity-40 disabled:cursor-not-allowed;
+    background: linear-gradient(135deg, #E8192C 0%, #A50E1C 100%);
+    color: #ffffff;
+    box-shadow: 0 2px 8px rgba(232,25,44,0.3);
   }
+  .btn-primary:hover:not(:disabled) {
+    background: linear-gradient(135deg, #C0111F 0%, #8B0000 100%);
+    box-shadow: 0 4px 20px rgba(232,25,44,0.4);
+  }
+
   .btn-outline {
-    @apply border border-brand-border text-white font-medium px-4 py-2 rounded-xl
-           hover:border-brand-red hover:text-brand-red transition-all duration-200;
+    @apply font-medium px-4 py-2 rounded-xl transition-all duration-200;
+    border: 1.5px solid #E8192C;
+    color: #E8192C;
+    background: transparent;
   }
+  .btn-outline:hover {
+    background: #E8192C;
+    color: #ffffff;
+  }
+
   .card {
-    @apply bg-brand-card rounded-2xl overflow-hidden border border-brand-border shadow-card;
+    @apply rounded-2xl overflow-hidden;
+    background-color: #FFFFFF;
+    border: 1px solid #E5E5E5;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
   }
+
   .input {
-    @apply w-full bg-brand-dark border border-brand-border text-white rounded-xl
-           px-4 py-3 text-sm placeholder-brand-muted
-           focus:outline-none focus:border-brand-red focus:ring-1 focus:ring-brand-red/30
-           transition-all duration-200;
+    @apply w-full rounded-xl px-4 py-3 text-sm transition-all duration-200;
+    background-color: #FFFFFF;
+    border: 1.5px solid #E5E5E5;
+    color: #1A1A1A;
   }
+  .input::placeholder { color: #AAAAAA; }
+  .input:focus {
+    outline: none;
+    border-color: #E8192C;
+    box-shadow: 0 0 0 3px rgba(232,25,44,0.1);
+  }
+
   .section-title {
-    @apply text-xl font-bold text-white mb-4;
+    @apply text-xl font-bold mb-4;
+    color: #1A1A1A;
   }
 }
