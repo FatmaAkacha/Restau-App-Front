@@ -1,49 +1,51 @@
 <template>
-  <div class="min-h-screen bg-brand-gray">
-    <!-- En-tête -->
-    <header class="bg-white border-b border-brand-border px-4 py-4 flex items-center gap-4">
-      <router-link to="/menu" class="text-gray-500 hover:text-brand-dark transition-colors">
+  <div class="min-h-screen bg-brand-black">
+
+    <!-- Header -->
+    <header class="bg-brand-dark border-b border-brand-border px-4 py-4
+                   flex items-center gap-4 sticky top-0 z-20 backdrop-blur">
+      <router-link to="/menu"
+                   class="text-brand-muted hover:text-brand-red transition-colors text-sm flex items-center gap-1">
         ← Retour
       </router-link>
-      <h1 class="text-lg font-bold">Passer la commande</h1>
+      <h1 class="text-base font-bold text-white">Passer la commande</h1>
     </header>
 
     <div class="max-w-3xl mx-auto px-4 py-6 space-y-4">
 
       <!-- Panier vide -->
-      <div v-if="cart.items.length === 0" class="text-center py-20 text-gray-400">
-        <div class="text-5xl mb-3">🛒</div>
-        <p>Votre panier est vide.</p>
-        <router-link to="/menu" class="btn-primary inline-block mt-4">Voir le menu</router-link>
+      <div v-if="cart.items.length === 0" class="text-center py-20 text-brand-muted">
+        <div class="text-5xl mb-3 opacity-30">🛒</div>
+        <p class="mb-4">Votre panier est vide.</p>
+        <router-link to="/menu">
+          <button class="btn-primary">Voir le menu</button>
+        </router-link>
       </div>
 
       <template v-else>
+
         <!-- Informations de livraison -->
         <div class="card p-5">
-          <h2 class="font-bold text-base mb-4">Informations de livraison</h2>
+          <h2 class="section-title text-base">📍 Informations de livraison</h2>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label class="block text-xs font-medium text-gray-500 mb-1">Nom complet *</label>
-              <input v-model="form.customer_name" type="text" placeholder="Jean Dupont"
-                     class="input" />
+              <label class="block text-xs font-medium text-brand-muted mb-1.5">Nom complet *</label>
+              <input v-model="form.customer_name" type="text" placeholder="Jean Dupont" class="input" />
             </div>
             <div>
-              <label class="block text-xs font-medium text-gray-500 mb-1">Téléphone *</label>
-              <input v-model="form.customer_phone" type="tel" placeholder="+33 6 00 00 00 00"
-                     class="input" />
+              <label class="block text-xs font-medium text-brand-muted mb-1.5">Téléphone *</label>
+              <input v-model="form.customer_phone" type="tel" placeholder="+33 6 00 00 00 00" class="input" />
             </div>
             <div class="sm:col-span-2">
-              <label class="block text-xs font-medium text-gray-500 mb-1">Email</label>
-              <input v-model="form.customer_email" type="email" placeholder="vous@exemple.com"
-                     class="input" />
+              <label class="block text-xs font-medium text-brand-muted mb-1.5">Email</label>
+              <input v-model="form.customer_email" type="email" placeholder="vous@exemple.com" class="input" />
             </div>
             <div class="sm:col-span-2">
-              <label class="block text-xs font-medium text-gray-500 mb-1">Adresse de livraison *</label>
-              <input v-model="form.delivery_address" type="text" placeholder="12 Rue de la Paix, Caen"
-                     class="input" />
+              <label class="block text-xs font-medium text-brand-muted mb-1.5">Adresse de livraison *</label>
+              <input v-model="form.delivery_address" type="text" placeholder="12 Rue de la Paix, Caen" class="input" />
             </div>
             <div class="sm:col-span-2">
-              <label class="block text-xs font-medium text-gray-500 mb-1">Notes de commande</label>
+              <label class="block text-xs font-medium text-brand-muted mb-1.5">Notes</label>
               <textarea v-model="form.notes" rows="2" placeholder="Allergies, demandes spéciales…"
                         class="input resize-none" />
             </div>
@@ -53,65 +55,68 @@
           <div class="flex gap-3 mt-4">
             <button v-for="t in ['delivery','pickup']" :key="t"
                     @click="form.type = t"
-                    :class="['flex-1 py-2 rounded-xl border text-sm font-medium transition-colors',
+                    :class="['flex-1 py-2.5 rounded-xl border text-sm font-semibold transition-all',
                              form.type === t
-                               ? 'border-brand-dark bg-brand-dark text-white'
-                               : 'border-brand-border text-gray-600 hover:bg-brand-gray']">
+                               ? 'border-brand-red bg-brand-red/10 text-brand-red'
+                               : 'border-brand-border text-brand-muted hover:border-brand-muted']">
               {{ t === 'delivery' ? '🚚 Livraison' : '🏃 À emporter' }}
             </button>
           </div>
         </div>
 
-        <!-- Récapitulatif de commande -->
+        <!-- Récapitulatif -->
         <div class="card p-5">
-          <h2 class="font-bold text-base mb-4">Récapitulatif</h2>
+          <h2 class="section-title text-base">🧾 Récapitulatif</h2>
           <div v-for="item in cart.items" :key="item.id"
-               class="flex justify-between text-sm py-2 border-b border-brand-border last:border-0">
-            <span>{{ item.quantity }}× {{ item.name }}</span>
-            <span class="font-medium">€{{ (item.price * item.quantity).toFixed(2) }}</span>
+               class="flex justify-between text-sm py-2.5 border-b border-brand-border last:border-0">
+            <span class="text-gray-300">{{ item.quantity }}× {{ item.name }}</span>
+            <span class="font-semibold text-white">€{{ (item.price * item.quantity).toFixed(2) }}</span>
           </div>
-          <div class="mt-3 space-y-1 text-sm text-gray-600">
-            <div class="flex justify-between">
-              <span>Sous-total</span><span>€{{ cart.subtotal.toFixed(2) }}</span>
+          <div class="mt-4 space-y-2 text-sm">
+            <div class="flex justify-between text-brand-muted">
+              <span>Sous-total</span><span class="text-gray-300">€{{ cart.subtotal.toFixed(2) }}</span>
             </div>
-            <div class="flex justify-between">
+            <div class="flex justify-between text-brand-muted">
               <span>Frais de livraison</span>
-              <span>{{ form.type === 'pickup' ? 'Gratuit' : '€2.50' }}</span>
+              <span class="text-gray-300">{{ form.type === 'pickup' ? 'Gratuit' : '€2.50' }}</span>
             </div>
-            <div class="flex justify-between font-bold text-brand-dark text-base pt-2 border-t border-brand-border">
-              <span>Total</span>
-              <span>€{{ total.toFixed(2) }}</span>
+            <div class="flex justify-between font-bold text-base pt-3 border-t border-brand-border">
+              <span class="text-white">Total</span>
+              <span class="text-brand-red">€{{ total.toFixed(2) }}</span>
             </div>
           </div>
         </div>
 
         <!-- Paiement -->
         <div class="card p-5">
-          <h2 class="font-bold text-base mb-4">Paiement</h2>
-
+          <h2 class="section-title text-base">💳 Paiement</h2>
           <div class="flex gap-3 mb-5">
             <button v-for="m in ['card','cash']" :key="m"
                     @click="paymentMethod = m"
-                    :class="['flex-1 py-2 rounded-xl border text-sm font-medium transition-colors',
+                    :class="['flex-1 py-2.5 rounded-xl border text-sm font-semibold transition-all',
                              paymentMethod === m
-                               ? 'border-brand-dark bg-brand-dark text-white'
-                               : 'border-brand-border text-gray-600 hover:bg-brand-gray']">
+                               ? 'border-brand-red bg-brand-red/10 text-brand-red'
+                               : 'border-brand-border text-brand-muted hover:border-brand-muted']">
               {{ m === 'card' ? '💳 Payer par carte' : '💵 Espèces à la livraison' }}
             </button>
           </div>
 
           <div v-if="paymentMethod === 'card'">
-            <div id="card-element" class="input py-3 bg-white" />
-            <p v-if="stripeError" class="text-red-500 text-xs mt-2">{{ stripeError }}</p>
+            <!-- Stripe card element styled for dark theme -->
+            <div id="card-element"
+                 class="bg-brand-dark border border-brand-border rounded-xl px-4 py-3.5" />
+            <p v-if="stripeError" class="text-brand-red text-xs mt-2">{{ stripeError }}</p>
           </div>
-
-          <p v-else class="text-sm text-gray-500 bg-brand-gray rounded-xl p-3">
-            Payez en espèces à la réception de votre commande. 🏠
-          </p>
+          <div v-else class="bg-brand-dark border border-brand-border rounded-xl p-4 text-sm text-brand-muted">
+            💵 Payez en espèces à la réception de votre commande.
+          </div>
         </div>
 
         <!-- Erreur -->
-        <p v-if="error" class="text-red-500 text-sm text-center">{{ error }}</p>
+        <p v-if="error" class="text-brand-red text-sm text-center bg-brand-red/10
+                               border border-brand-red/30 rounded-xl p-3">
+          {{ error }}
+        </p>
 
         <!-- Bouton commander -->
         <button @click="placeOrder" :disabled="loading" class="btn-primary w-full py-4 text-base">
@@ -119,8 +124,9 @@
             <span class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
             Traitement en cours…
           </span>
-          <span v-else>Commander · €{{ total.toFixed(2) }}</span>
+          <span v-else>Commander · €{{ total.toFixed(2) }} →</span>
         </button>
+
       </template>
     </div>
   </div>
@@ -128,7 +134,7 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter }     from 'vue-router'
 import { useCartStore }  from '@/stores/cartStore'
 import orderService      from '@/services/orderService'
 import paymentService    from '@/services/paymentService'
@@ -137,21 +143,15 @@ const cart   = useCartStore()
 const router = useRouter()
 
 const form = ref({
-  customer_name:    '',
-  customer_phone:   '',
-  customer_email:   '',
-  delivery_address: '',
-  notes:            '',
-  type:             'delivery',
+  customer_name: '', customer_phone: '', customer_email: '',
+  delivery_address: '', notes: '', type: 'delivery',
 })
-
 const paymentMethod = ref('card')
 const loading       = ref(false)
 const error         = ref('')
 const stripeError   = ref('')
 
-let stripe      = null
-let cardElement = null
+let stripe = null, cardElement = null
 
 const deliveryFee = computed(() => form.value.type === 'pickup' ? 0 : 2.50)
 const total       = computed(() => cart.subtotal + deliveryFee.value)
@@ -161,12 +161,18 @@ onMounted(async () => {
   if (!stripe) return
   const elements = stripe.elements()
   cardElement = elements.create('card', {
-    style: { base: { fontSize: '15px', color: '#1A1A1A', '::placeholder': { color: '#9CA3AF' } } }
+    style: {
+      base: {
+        fontSize: '15px', color: '#FFFFFF',
+        '::placeholder': { color: '#6B6B6B' },
+        iconColor: '#E8192C',
+      },
+      invalid: { color: '#E8192C' }
+    }
   })
   cardElement.mount('#card-element')
   cardElement.on('change', e => { stripeError.value = e.error?.message || '' })
 })
-
 onUnmounted(() => cardElement?.destroy())
 
 async function placeOrder() {
@@ -178,8 +184,7 @@ async function placeOrder() {
   loading.value = true
   try {
     const { data: order } = await orderService.create({
-      restaurant_id: cart.restaurantId,
-      ...form.value,
+      restaurant_id: cart.restaurantId, ...form.value,
       items: cart.items.map(i => ({ menu_item_id: i.id, quantity: i.quantity }))
     })
     if (paymentMethod.value === 'card') {
@@ -199,10 +204,3 @@ async function placeOrder() {
   }
 }
 </script>
-
-<style scoped>
-.input {
-  @apply w-full border border-brand-border rounded-xl px-4 py-2.5 text-sm
-         focus:outline-none focus:ring-2 focus:ring-brand-dark/20 focus:border-brand-dark transition-colors;
-}
-</style>

@@ -4,20 +4,35 @@
 
 @layer base {
   * { box-sizing: border-box; }
-  body { @apply font-sans text-brand-dark bg-white; }
+  body { @apply font-sans text-white bg-brand-black; }
   img  { @apply max-w-full; }
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: #1C1C1C; }
+  ::-webkit-scrollbar-thumb { background: #E8192C; border-radius: 4px; }
 }
 
 @layer components {
   .btn-primary {
-    @apply bg-brand-dark text-white font-semibold px-6 py-3 rounded-full
-           hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply bg-brand-red text-white font-bold px-6 py-3 rounded-xl
+           hover:bg-brand-redDark active:scale-95
+           transition-all duration-200
+           shadow-red-sm hover:shadow-red-glow
+           disabled:opacity-40 disabled:cursor-not-allowed;
   }
-  .btn-ghost {
-    @apply border border-brand-border text-brand-dark font-medium px-4 py-2 rounded-full
-           hover:bg-brand-gray transition-colors;
+  .btn-outline {
+    @apply border border-brand-border text-white font-medium px-4 py-2 rounded-xl
+           hover:border-brand-red hover:text-brand-red transition-all duration-200;
   }
   .card {
-    @apply bg-white rounded-2xl overflow-hidden shadow-sm border border-brand-border;
+    @apply bg-brand-card rounded-2xl overflow-hidden border border-brand-border shadow-card;
+  }
+  .input {
+    @apply w-full bg-brand-dark border border-brand-border text-white rounded-xl
+           px-4 py-3 text-sm placeholder-brand-muted
+           focus:outline-none focus:border-brand-red focus:ring-1 focus:ring-brand-red/30
+           transition-all duration-200;
+  }
+  .section-title {
+    @apply text-xl font-bold text-white mb-4;
   }
 }

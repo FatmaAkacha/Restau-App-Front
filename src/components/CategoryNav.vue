@@ -1,15 +1,15 @@
 <template>
-  <nav class="sticky top-0 z-20 bg-white border-b border-brand-border -mx-4 px-4 mb-6">
-    <div class="flex gap-1 overflow-x-auto scrollbar-hide py-3">
+  <nav class="sticky top-0 z-20 bg-brand-black/95 backdrop-blur border-b border-brand-border -mx-4 px-4 mb-6">
+    <div class="flex gap-2 overflow-x-auto scrollbar-hide py-3">
       <button
         v-for="cat in categories"
         :key="cat.id"
         @click="scrollTo(cat.id)"
         :class="[
-          'flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-medium transition-colors',
+          'flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-200',
           active === cat.id
-            ? 'bg-brand-dark text-white'
-            : 'text-gray-600 hover:bg-brand-gray'
+            ? 'bg-brand-red text-white shadow-red-sm'
+            : 'text-brand-muted hover:text-white hover:bg-brand-card border border-brand-border'
         ]"
       >
         {{ cat.name }}
