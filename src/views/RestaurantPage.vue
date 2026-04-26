@@ -21,7 +21,9 @@
           <CategoryNav :categories="store.restaurant.categories" />
 
           <div v-for="cat in store.restaurant.categories" :key="cat.id"
-               :id="`cat-${cat.id}`" class="mb-10">
+               :id="`cat-${cat.id}`"
+               class="mb-10"
+               style="scroll-margin-top: 64px">
             <h2 class="section-title">{{ cat.name }}</h2>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <MenuItemCard

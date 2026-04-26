@@ -1,6 +1,7 @@
 <template>
   <div class="min-h-screen" style="background:#F7F7F7">
 
+    <!-- Header -->
     <header class="border-b px-4 py-4 flex items-center gap-4 sticky top-0 z-20"
             style="background:#fff; border-color:#E5E5E5">
       <router-link to="/menu" class="text-sm transition-colors hover:text-red-600" style="color:#888">
@@ -12,7 +13,7 @@
     <div class="max-w-3xl mx-auto px-4 py-6 space-y-4">
 
       <!-- Panier vide -->
-      <div v-if="cart.items.length === 0" class="text-center py-20 text-brand-muted">
+      <div v-if="cart.items.length === 0" class="text-center py-20" style="color:#888">
         <div class="text-5xl mb-3 opacity-30">🛒</div>
         <p class="mb-4">Votre panier est vide.</p>
         <router-link to="/menu">
@@ -24,26 +25,26 @@
 
         <!-- Informations de livraison -->
         <div class="card p-5">
-          <h2 class="section-title text-base">📍 Informations de livraison</h2>
+          <h2 class="font-bold text-base mb-4" style="color:#1A1A1A">📍 Informations de livraison</h2>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label class="block text-xs font-medium text-brand-muted mb-1.5">Nom complet *</label>
+              <label class="block text-xs font-medium mb-1.5" style="color:#888">Nom complet *</label>
               <input v-model="form.customer_name" type="text" placeholder="Jean Dupont" class="input" />
             </div>
             <div>
-              <label class="block text-xs font-medium text-brand-muted mb-1.5">Téléphone *</label>
+              <label class="block text-xs font-medium mb-1.5" style="color:#888">Téléphone *</label>
               <input v-model="form.customer_phone" type="tel" placeholder="+33 6 00 00 00 00" class="input" />
             </div>
             <div class="sm:col-span-2">
-              <label class="block text-xs font-medium text-brand-muted mb-1.5">Email</label>
+              <label class="block text-xs font-medium mb-1.5" style="color:#888">Email</label>
               <input v-model="form.customer_email" type="email" placeholder="vous@exemple.com" class="input" />
             </div>
             <div class="sm:col-span-2">
-              <label class="block text-xs font-medium text-brand-muted mb-1.5">Adresse de livraison *</label>
+              <label class="block text-xs font-medium mb-1.5" style="color:#888">Adresse de livraison *</label>
               <input v-model="form.delivery_address" type="text" placeholder="12 Rue de la Paix, Caen" class="input" />
             </div>
             <div class="sm:col-span-2">
-              <label class="block text-xs font-medium text-brand-muted mb-1.5">Notes</label>
+              <label class="block text-xs font-medium mb-1.5" style="color:#888">Notes</label>
               <textarea v-model="form.notes" rows="2" placeholder="Allergies, demandes spéciales…"
                         class="input resize-none" />
             </div>
@@ -64,30 +65,33 @@
 
         <!-- Récapitulatif -->
         <div class="card p-5">
-          <h2 class="section-title text-base">🧾 Récapitulatif</h2>
+          <h2 class="font-bold text-base mb-4" style="color:#1A1A1A">🧾 Récapitulatif</h2>
           <div v-for="item in cart.items" :key="item.id"
-               class="flex justify-between text-sm py-2.5 border-b border-brand-border last:border-0">
-            <span class="text-gray-300">{{ item.quantity }}× {{ item.name }}</span>
-            <span class="font-semibold text-white">€{{ (item.price * item.quantity).toFixed(2) }}</span>
+               class="flex justify-between text-sm py-2.5"
+               style="border-bottom:1px solid #F0F0F0">
+            <span style="color:#555">{{ item.quantity }}× {{ item.name }}</span>
+            <span class="font-semibold" style="color:#1A1A1A">€{{ (item.price * item.quantity).toFixed(2) }}</span>
           </div>
           <div class="mt-4 space-y-2 text-sm">
-            <div class="flex justify-between text-brand-muted">
-              <span>Sous-total</span><span class="text-gray-300">€{{ cart.subtotal.toFixed(2) }}</span>
+            <div class="flex justify-between" style="color:#888">
+              <span>Sous-total</span>
+              <span>€{{ cart.subtotal.toFixed(2) }}</span>
             </div>
-            <div class="flex justify-between text-brand-muted">
+            <div class="flex justify-between" style="color:#888">
               <span>Frais de livraison</span>
-              <span class="text-gray-300">{{ form.type === 'pickup' ? 'Gratuit' : '€2.50' }}</span>
+              <span>{{ form.type === 'pickup' ? 'Gratuit' : '€2.50' }}</span>
             </div>
-            <div class="flex justify-between font-bold text-base pt-3 border-t border-brand-border">
-              <span class="text-white">Total</span>
-              <span class="text-brand-red">€{{ total.toFixed(2) }}</span>
+            <div class="flex justify-between font-bold text-base pt-3"
+                 style="border-top:1px solid #E5E5E5; color:#1A1A1A">
+              <span>Total</span>
+              <span style="color:#E8192C">€{{ total.toFixed(2) }}</span>
             </div>
           </div>
         </div>
 
         <!-- Paiement -->
         <div class="card p-5">
-          <h2 class="section-title text-base">💳 Paiement</h2>
+          <h2 class="font-bold text-base mb-4" style="color:#1A1A1A">💳 Paiement</h2>
           <div class="flex gap-3 mb-5">
             <button v-for="m in ['card','cash']" :key="m"
                     @click="paymentMethod = m"
@@ -111,8 +115,8 @@
         </div>
 
         <!-- Erreur -->
-        <p v-if="error" class="text-brand-red text-sm text-center bg-brand-red/10
-                               border border-brand-red/30 rounded-xl p-3">
+        <p v-if="error" class="text-sm text-center rounded-xl p-3"
+           style="color:#E8192C; background:#FFF0F1; border:1px solid #FFCDD0">
           {{ error }}
         </p>
 
@@ -132,10 +136,10 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { useRouter }     from 'vue-router'
-import { useCartStore }  from '@/stores/cartStore'
-import orderService      from '@/services/orderService'
-import paymentService    from '@/services/paymentService'
+import { useRouter }    from 'vue-router'
+import { useCartStore } from '@/stores/cartStore'
+import orderService     from '@/services/orderService'
+import paymentService   from '@/services/paymentService'
 
 const cart   = useCartStore()
 const router = useRouter()
@@ -161,8 +165,9 @@ onMounted(async () => {
   cardElement = elements.create('card', {
     style: {
       base: {
-        fontSize: '15px', color: '#FFFFFF',
-        '::placeholder': { color: '#6B6B6B' },
+        fontSize: '15px',
+        color: '#1A1A1A',
+        '::placeholder': { color: '#AAAAAA' },
         iconColor: '#E8192C',
       },
       invalid: { color: '#E8192C' }
@@ -182,7 +187,8 @@ async function placeOrder() {
   loading.value = true
   try {
     const { data: order } = await orderService.create({
-      restaurant_id: cart.restaurantId, ...form.value,
+      restaurant_id: cart.restaurantId,
+      ...form.value,
       items: cart.items.map(i => ({ menu_item_id: i.id, quantity: i.quantity }))
     })
     if (paymentMethod.value === 'card') {
