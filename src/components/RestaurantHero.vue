@@ -1,34 +1,47 @@
 <template>
   <div class="relative">
-    <!-- Cover -->
-    <div class="h-48 md:h-64 overflow-hidden relative"
-         style="background:linear-gradient(135deg,#E8192C 0%,#A50E1C 100%)">
-      <img v-if="restaurant.cover_image"
-           :src="restaurant.cover_image"
-           class="w-full h-full object-cover opacity-30 mix-blend-multiply" />
-      <!-- Pattern overlay -->
-      <div class="absolute inset-0 opacity-10"
-           style="background-image:radial-gradient(circle, #fff 1px, transparent 1px);
-                  background-size:24px 24px;" />
-      <!-- Bottom fade to white -->
-      <div class="absolute bottom-0 left-0 right-0 h-16"
+    <!-- Cover dark with red gradient -->
+    <div class="h-44 md:h-56 overflow-hidden relative"
+         style="background:linear-gradient(135deg,#1A1A1A 0%,#2A0A0A 50%,#1A1A1A 100%)">
+      <!-- Texture overlay -->
+      <div class="absolute inset-0 opacity-20"
+           style="background-image:radial-gradient(circle at 20% 50%, #E8192C 0%, transparent 50%),
+                                   radial-gradient(circle at 80% 50%, #A50E1C 0%, transparent 50%)" />
+      <!-- Food text decoration -->
+      <div class="absolute inset-0 flex items-center justify-center opacity-5">
+        <p class="font-black text-white text-6xl tracking-widest">GOOD NAAN</p>
+      </div>
+      <!-- Bottom fade -->
+      <div class="absolute bottom-0 left-0 right-0 h-20"
            style="background:linear-gradient(to bottom, transparent, #F7F7F7)" />
     </div>
 
     <!-- Info bar -->
     <div class="max-w-6xl mx-auto px-4">
       <div class="flex items-end gap-4 -mt-10 pb-4 relative z-10">
-        <!-- Logo -->
-        <div class="w-20 h-20 rounded-2xl flex items-center justify-center flex-shrink-0
+        <!-- Logo circulaire -->
+        <div class="w-20 h-20 rounded-full flex items-center justify-center flex-shrink-0
                     border-4 border-white shadow-lg"
-             style="background:linear-gradient(135deg,#E8192C,#A50E1C)">
-          <img v-if="restaurant.logo" :src="restaurant.logo"
-               class="w-full h-full object-cover rounded-xl" />
-          <span v-else class="text-3xl">🍽️</span>
+             style="background:#fff">
+          <div class="w-16 h-16 rounded-full flex items-center justify-center border-2"
+               style="border-color:#E8192C">
+            <div class="text-center leading-none">
+              <div class="font-black text-xs" style="color:#1A1A1A">GOOD</div>
+              <div class="font-black text-xs" style="color:#1A1A1A">NAAN</div>
+              <div class="w-8 h-1 mx-auto rounded mt-0.5" style="background:#E8192C" />
+            </div>
+          </div>
         </div>
         <div class="pb-1">
-          <h1 class="text-2xl font-extrabold" style="color:#1A1A1A">{{ restaurant.name }}</h1>
-          <p class="text-sm mt-0.5" style="color:#888">{{ restaurant.description }}</p>
+          <h1 class="font-black text-2xl" style="color:#1A1A1A; letter-spacing:-1px">
+            GOOD<span style="color:#E8192C">NAAN</span>
+          </h1>
+          <p class="text-xs mt-0.5" style="color:#888">
+            Cheese Naan · Tortilla · Tacos · Bowls · Pizza
+          </p>
+          <p class="text-xs mt-0.5" style="color:#AAA">
+            📍 22 Rue de la Défense Passive, 14000 Caen
+          </p>
         </div>
       </div>
 
