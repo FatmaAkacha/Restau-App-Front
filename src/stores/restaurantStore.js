@@ -7,14 +7,19 @@ export const useRestaurantStore = defineStore('restaurant', () => {
   const loading    = ref(false)
   const error      = ref(null)
 
-  async function fetchMenu(id = 1) {
+  async function fetchMenu() {
     loading.value = true
     error.value   = null
     try {
-      const { data } = await restaurantService.getMenu(id)
+      // Fetch the list first to get the real ID (avoids hardcoded ID issues)
+      const list = await restaurantService.getAll()
+      const first = list.data?.[0]
+      if (!first) throw new Error('No restaurant found')
+
+      const { data } = await restaurantService.getMenu(first.id)
       restaurant.value = data
     } catch (e) {
-      error.value = 'Failed to load menu.'
+      error.value = 'Impossible de charger le menu.'
     } finally {
       loading.value = false
     }

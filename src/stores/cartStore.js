@@ -2,18 +2,15 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 
 export const useCartStore = defineStore('cart', () => {
-  const items       = ref([])
+  const items        = ref([])
   const restaurantId = ref(null)
 
   const itemCount = computed(() => items.value.reduce((s, i) => s + i.quantity, 0))
-
-  const subtotal  = computed(() =>
-    items.value.reduce((s, i) => s + i.price * i.quantity, 0)
-  )
+  const subtotal  = computed(() => items.value.reduce((s, i) => s + i.price * i.quantity, 0))
 
   function addItem(menuItem) {
+    // If adding from a different restaurant, clear cart first
     if (restaurantId.value && restaurantId.value !== menuItem.restaurant_id) {
-      // Different restaurant — clear cart first
       items.value = []
     }
     restaurantId.value = menuItem.restaurant_id
@@ -41,5 +38,10 @@ export const useCartStore = defineStore('cart', () => {
     restaurantId.value = null
   }
 
-  return { items, restaurantId, itemCount, subtotal, addItem, removeItem, clearCart }
+  // Called by CheckoutPage to ensure restaurant_id is always fresh
+  function setRestaurantId(id) {
+    restaurantId.value = id
+  }
+
+  return { items, restaurantId, itemCount, subtotal, addItem, removeItem, clearCart, setRestaurantId }
 }, { persist: true })

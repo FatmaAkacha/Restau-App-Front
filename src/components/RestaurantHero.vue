@@ -1,18 +1,14 @@
 <template>
   <div class="relative">
-    <!-- Cover dark with red gradient -->
-    <div class="h-44 md:h-56 overflow-hidden relative"
-         style="background:linear-gradient(135deg,#1A1A1A 0%,#2A0A0A 50%,#1A1A1A 100%)">
-      <!-- Texture overlay -->
-      <div class="absolute inset-0 opacity-20"
-           style="background-image:radial-gradient(circle at 20% 50%, #E8192C 0%, transparent 50%),
-                                   radial-gradient(circle at 80% 50%, #A50E1C 0%, transparent 50%)" />
-      <!-- Food text decoration -->
-      <div class="absolute inset-0 flex items-center justify-center opacity-5">
-        <p class="font-black text-white text-6xl tracking-widest">GOOD NAAN</p>
-      </div>
+    <!-- Cover simple white/gray -->
+    <div class="h-40 md:h-48 overflow-hidden relative"
+         style="background:#FAFAFA">
+      <!-- Subtle pattern -->
+      <div class="absolute inset-0 opacity-5"
+           style="background-image:radial-gradient(circle, #1A1A1A 1px, transparent 1px);
+                  background-size:20px 20px" />
       <!-- Bottom fade -->
-      <div class="absolute bottom-0 left-0 right-0 h-20"
+      <div class="absolute bottom-0 left-0 right-0 h-16"
            style="background:linear-gradient(to bottom, transparent, #F7F7F7)" />
     </div>
 

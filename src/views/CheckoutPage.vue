@@ -135,14 +135,16 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { useRouter }    from 'vue-router'
-import { useCartStore } from '@/stores/cartStore'
-import orderService     from '@/services/orderService'
-import paymentService   from '@/services/paymentService'
+import { ref, computed, onMounted, onUnmounted, nextTick, watch } from 'vue'
+import { useRouter }         from 'vue-router'
+import { useCartStore }      from '@/stores/cartStore'
+import { useRestaurantStore } from '@/stores/restaurantStore'
+import orderService          from '@/services/orderService'
+import paymentService        from '@/services/paymentService'
 
-const cart   = useCartStore()
-const router = useRouter()
+const cart       = useCartStore()
+const restStore  = useRestaurantStore()
+const router     = useRouter()
 
 const form = ref({
   customer_name: '', customer_phone: '', customer_email: '',
@@ -158,23 +160,33 @@ let stripe = null, cardElement = null
 const deliveryFee = computed(() => form.value.type === 'pickup' ? 0 : 2.50)
 const total       = computed(() => cart.subtotal + deliveryFee.value)
 
-onMounted(async () => {
-  stripe = await paymentService.getStripe()
+async function mountCard() {
   if (!stripe) return
+  // Destroy existing element before remounting
+  if (cardElement) { cardElement.destroy(); cardElement = null }
+  await nextTick()
+  const el = document.getElementById('card-element')
+  if (!el) return
   const elements = stripe.elements()
   cardElement = elements.create('card', {
     style: {
-      base: {
-        fontSize: '15px',
-        color: '#1A1A1A',
-        '::placeholder': { color: '#AAAAAA' },
-        iconColor: '#E8192C',
-      },
+      base: { fontSize: '15px', color: '#1A1A1A', '::placeholder': { color: '#AAAAAA' }, iconColor: '#E8192C' },
       invalid: { color: '#E8192C' }
     }
   })
   cardElement.mount('#card-element')
   cardElement.on('change', e => { stripeError.value = e.error?.message || '' })
+}
+
+// Remount Stripe card element whenever switching back to 'card'
+watch(paymentMethod, async (val) => {
+  if (val === 'card') await mountCard()
+})
+
+onMounted(async () => {
+  if (!restStore.restaurant) await restStore.fetchMenu()
+  stripe = await paymentService.getStripe()
+  if (stripe) await mountCard()
 })
 onUnmounted(() => cardElement?.destroy())
 
@@ -184,10 +196,18 @@ async function placeOrder() {
     error.value = 'Veuillez remplir tous les champs obligatoires.'
     return
   }
+
+  // Always use the fresh restaurant ID from the store, not the stale cart one
+  const restaurantId = restStore.restaurant?.id || cart.restaurantId
+  if (!restaurantId) {
+    error.value = 'Restaurant introuvable. Veuillez recharger la page.'
+    return
+  }
+
   loading.value = true
   try {
     const { data: order } = await orderService.create({
-      restaurant_id: cart.restaurantId,
+      restaurant_id: restaurantId,
       ...form.value,
       items: cart.items.map(i => ({ menu_item_id: i.id, quantity: i.quantity }))
     })

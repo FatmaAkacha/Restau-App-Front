@@ -22,7 +22,7 @@
         </div>
         <div class="text-right">
           <p class="font-bold text-lg" style="color:#E8192C">€{{ Number(order.total).toFixed(2) }}</p>
-          <p class="text-xs" style="color:#888">#{{ order.id }}</p>
+          <p class="text-xs" style="color:#888">N° {{ String(order.id).padStart(3, '0') }}</p>
         </div>
       </div>
 
