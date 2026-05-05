@@ -58,7 +58,7 @@
                     :style="form.type === t
                       ? 'border-color:#E8192C; background:#FFF0F1; color:#E8192C'
                       : 'border-color:#E5E5E5; background:#fff; color:#888'">
-              {{ t === 'delivery' ? '🚚 Livraison' : '🏃 À emporter' }}
+              {{ t === 'delivery' ? 'Livraison' : 'À emporter' }}
             </button>
           </div>
         </div>

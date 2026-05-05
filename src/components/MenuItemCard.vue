@@ -27,10 +27,14 @@
     <div class="relative flex-shrink-0 w-24 h-24 rounded-xl overflow-hidden"
          style="background:#F7F7F7">
       <img v-if="item.image"
-           :src="`/storage/${item.image}`"
+           :src="`/images/menu/${item.image}`"
            :alt="item.name"
-           class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-      <div v-else class="w-full h-full flex items-center justify-center text-3xl">🍽️</div>
+           class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+           @error="e => e.target.style.display='none'" />
+      <div class="w-full h-full flex items-center justify-center text-3xl absolute inset-0"
+           :class="item.image ? 'z-[-1]' : ''">
+        {{ emoji }}
+      </div>
 
       <!-- + button -->
       <button
@@ -46,6 +50,22 @@
 </template>
 
 <script setup>
-defineProps({ item: Object })
+import { computed } from 'vue'
+const props = defineProps({ item: Object })
 defineEmits(['add'])
+
+const emoji = computed(() => {
+  const n = (props.item?.name || '').toLowerCase()
+  const c = (props.item?.category?.name || '').toLowerCase()
+  if (n.includes('pizza') || c.includes('pizza'))                    return '🍕'
+  if (n.includes('tacos') || c.includes('tacos'))                    return '🌮'
+  if (n.includes('tortilla'))                                        return '🌯'
+  if (n.includes('naan') || n.includes('bowl') || c.includes('sandwich')) return '🥙'
+  if (n.includes('gratin') || c.includes('gratin'))                  return '🧀'
+  if (n.includes('frites') || n.includes('nugget') || n.includes('tender') || c.includes('tex')) return '🍟'
+  if (n.includes('tiramisu') || n.includes('tarte') || c.includes('dessert')) return '🍰'
+  if (n.includes('coca') || n.includes('canette') || n.includes('boisson') || c.includes('boisson')) return '🥤'
+  if (n.includes('enfant'))                                          return '🍗'
+  return '🍽️'
+})
 </script>

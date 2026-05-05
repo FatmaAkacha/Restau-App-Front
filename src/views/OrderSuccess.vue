@@ -53,7 +53,7 @@
           </div>
           <div class="flex justify-between text-sm">
             <span style="color:#888">Type</span>
-            <span style="color:#555">{{ order.type === 'delivery' ? '🚚 Livraison' : '🏃 À emporter' }}</span>
+            <span style="color:#555">{{ order.type === 'delivery' ? 'Livraison' : 'À emporter' }}</span>
           </div>
           <div class="flex justify-between font-bold text-base pt-2.5 border-t" style="border-color:#E5E5E5">
             <span style="color:#1A1A1A">Total</span>

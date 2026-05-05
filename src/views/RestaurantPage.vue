@@ -30,7 +30,7 @@
               <input
                 v-model="search"
                 type="text"
-                placeholder="Rechercher…"
+                placeholder="Rechercher"
                 class="w-full rounded-xl pl-8 pr-8 py-2 text-xs transition-all"
                 style="background:#fff; border:1.5px solid #E5E5E5; color:#1A1A1A; outline:none"
                 @focus="e => e.target.style.borderColor='#E8192C'"

@@ -32,7 +32,7 @@
               :style="order.type === 'delivery'
                 ? 'background:#EFF6FF; color:#2563EB'
                 : 'background:#FAF5FF; color:#7C3AED'">
-          {{ order.type === 'delivery' ? '🚚 Livraison' : '🏃 À emporter' }}
+          {{ order.type === 'delivery' ? 'Livraison' : 'À emporter' }}
         </span>
         <span class="text-xs font-medium px-2.5 py-1 rounded-full"
               :style="order.payment_status === 'paid'

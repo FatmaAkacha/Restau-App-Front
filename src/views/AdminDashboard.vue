@@ -9,7 +9,7 @@
              style="background:linear-gradient(135deg,#E8192C,#A50E1C)">🍽️</div>
         <div>
           <h1 class="font-bold text-base leading-none" style="color:#1A1A1A">Tableau de bord</h1>
-          <p class="text-xs mt-0.5" style="color:#888">Good Naan Restaurant</p>
+          <p class="text-xs mt-0.5" style="color:#888">GOODNAAN Restaurant</p>
         </div>
       </div>
 
@@ -36,17 +36,17 @@
 
       <!-- ── STATS RAPIDES ── -->
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <StatCard icon="🔔" label="En attente"   :value="store.stats.pending"   color="yellow" />
-        <StatCard icon="👨‍🍳" label="En cuisine"   :value="store.stats.preparing" color="blue"   />
-        <StatCard icon="✅" label="Livrées"      :value="store.stats.delivered" color="green"  />
-        <StatCard icon="📦" label="Total commandes" :value="store.stats.total_orders || 0" color="gray" />
+        <StatCard icon-img="/images/icons/enattente.png" label="En attente"      :value="store.stats.pending"           color="yellow" />
+        <StatCard icon-img="/images/icons/encuisine.png" label="En cuisine"      :value="store.stats.preparing"         color="blue"   />
+        <StatCard icon-img="/images/icons/livrees.png"   label="Livrées"         :value="store.stats.delivered"         color="green"  />
+        <StatCard icon-img="/images/icons/total.png"     label="Total commandes" :value="store.stats.total_orders || 0" color="gray"   />
       </div>
 
       <!-- ── CHIFFRE D'AFFAIRES ── -->
       <div class="card p-6">
         <div class="flex items-center justify-between mb-5">
           <div>
-            <h2 class="font-bold text-lg" style="color:#1A1A1A">💶 Chiffre d'affaires</h2>
+            <h2 class="font-bold text-lg" style="color:#1A1A1A">Chiffre d'affaires</h2>
             <p class="text-xs mt-0.5" style="color:#888">Uniquement les commandes payées</p>
           </div>
           <!-- Total global badge -->
@@ -108,19 +108,6 @@
               <p class="font-bold text-base" style="color:#1A1A1A">€{{ fmt(store.stats.avg_order) }}</p>
               <p class="text-xs" style="color:#888">par commande</p>
             </div>
-          </div>
-        </div>
-
-        <!-- Progress bar carte vs espèces -->
-        <div class="mt-5" v-if="totalRevenueMixed > 0">
-          <div class="flex justify-between text-xs mb-1.5" style="color:#888">
-            <span>💳 Carte {{ cardPct }}%</span>
-            <span>💵 Espèces {{ cashPct }}%</span>
-          </div>
-          <div class="h-2.5 rounded-full overflow-hidden" style="background:#F0F0F0">
-            <div class="h-full rounded-full transition-all duration-500"
-                 style="background:linear-gradient(90deg,#E8192C,#A50E1C)"
-                 :style="{ width: cardPct + '%' }" />
           </div>
         </div>
       </div>
@@ -189,7 +176,7 @@
                   <div class="text-xs" style="color:#888">{{ order.customer_phone }}</div>
                 </td>
                 <td class="px-5 py-3 text-sm" style="color:#555">
-                  {{ order.type === 'delivery' ? '🚚 Livraison' : '🏃 À emporter' }}
+                  {{ order.type === 'delivery' ? 'Livraison' : 'À emporter' }}
                 </td>
                 <td class="px-5 py-3 font-bold" style="color:#E8192C">
                   €{{ Number(order.total).toFixed(2) }}

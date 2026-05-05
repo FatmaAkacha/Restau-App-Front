@@ -7,7 +7,13 @@
     <!-- Image area -->
     <div class="h-28 relative overflow-hidden"
          style="background:linear-gradient(135deg,#FFF0F1,#FFE4E6)">
-      <div class="w-full h-full flex items-center justify-center text-5xl">
+      <img v-if="item.image"
+           :src="`/images/menu/${item.image}`"
+           :alt="item.name"
+           class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+           @error="e => e.target.style.display='none'" />
+      <div class="w-full h-full flex items-center justify-center text-5xl absolute inset-0"
+           :class="item.image ? 'z-[-1]' : ''">
         {{ emoji }}
       </div>
       <!-- Popular badge -->

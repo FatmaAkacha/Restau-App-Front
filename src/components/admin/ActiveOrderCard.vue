@@ -6,7 +6,7 @@
       <div>
         <p class="font-semibold" style="color:#1A1A1A">{{ order.customer_name }}</p>
         <p class="text-xs mt-0.5" style="color:#888">
-          {{ order.type === 'delivery' ? '🚚 ' + order.delivery_address : '🏃 À emporter' }}
+          {{ order.type === 'delivery' ? '🚚 ' + order.delivery_address : 'À emporter' }}
         </p>
       </div>
       <StatusBadge :status="order.status" />
