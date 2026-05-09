@@ -4,37 +4,18 @@
     <div class="relative z-10 flex flex-col items-center w-full max-w-sm mx-auto px-4 pt-10 pb-8">
 
       <!-- LOGO circulaire -->
-      <div class="relative mb-5">
-        <div class="w-40 h-40 rounded-full flex items-center justify-center relative"
-             style="border: 3px solid #E8192C; background:#fff; box-shadow: 0 0 20px rgba(232,25,44,0.2)">
-          
-          <div class="absolute inset-2 rounded-full"
-               style="border: 1.5px dashed rgba(232,25,44,0.3)" />
+<div class="relative mb-5">
+  <div class="w-40 h-40 rounded-full flex items-center justify-center relative overflow-hidden"
+       style="border: 3px solid #E8192C; background:#fff; box-shadow: 0 0 20px rgba(232,25,44,0.2)">
 
-          <div class="text-center px-3">
-            <div class="flex justify-center mb-1">
-              <span style="color:#E8192C; font-size:0.65rem; letter-spacing:2px">★ ★ ★ ★ ★</span>
-            </div>
+    <img 
+      src="/images/menu/logo.png" 
+      alt="Logo Good Naan"
+      class="w-full h-full object-cover rounded-full"
+    />
 
-            <div class="flex justify-center gap-0.5 text-sm mb-1">
-              <span>🍕</span><span>🌮</span><span>🥙</span>
-            </div>
-
-            <div class="font-black leading-none"
-                 style="font-size:1.4rem; color:#1A1A1A; letter-spacing:-1px">
-              GOOD
-            </div>
-
-            <div class="font-black leading-none"
-                 style="font-size:1.4rem; color:#1A1A1A; letter-spacing:-1px">
-              NAAN
-            </div>
-
-            <div class="mt-1 mx-auto rounded-sm"
-                 style="height:5px; width:50px; background:linear-gradient(90deg,#E8192C,#A50E1C)" />
-          </div>
-        </div>
-      </div>
+  </div>
+</div>
 
       <!-- TAGLINE -->
       <p class="font-black text-center mb-4 tracking-wide"

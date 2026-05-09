@@ -16,17 +16,16 @@
     <div class="max-w-6xl mx-auto px-4">
       <div class="flex items-end gap-4 -mt-10 pb-4 relative z-10">
         <!-- Logo circulaire -->
-        <div class="w-20 h-20 rounded-full flex items-center justify-center flex-shrink-0
-                    border-4 border-white shadow-lg"
-             style="background:#fff">
-          <div class="w-16 h-16 rounded-full flex items-center justify-center border-2"
-               style="border-color:#E8192C">
-            <div class="text-center leading-none">
-              <div class="font-black text-xs" style="color:#1A1A1A">GOOD</div>
-              <div class="font-black text-xs" style="color:#1A1A1A">NAAN</div>
-              <div class="w-8 h-1 mx-auto rounded mt-0.5" style="background:#E8192C" />
-            </div>
-          </div>
+        <div class="w-20 h-20 rounded-full flex items-center justify-center flex-shrink-0 
+                    border-4 border-white shadow-lg overflow-hidden"
+            style="background:#fff">
+
+          <img 
+            src="/images/menu/logo.png" 
+            alt="Logo"
+            class="w-full h-full object-cover rounded-full"
+          />
+
         </div>
         <div class="pb-1">
           <h1 class="font-black text-2xl" style="color:#1A1A1A; letter-spacing:-1px">
