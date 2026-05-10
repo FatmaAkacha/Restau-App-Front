@@ -120,7 +120,38 @@
               </div>
             </div>
 
-            <RestaurantLocation
+           <!-- Divider -->
+<div class="relative py-6 mb-2">
+  <div class="absolute inset-0 flex items-center">
+    <div class="w-full h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent"></div>
+  </div>
+
+  <div class="relative flex justify-center">
+    <div class="px-5 py-2 rounded-full text-xs font-bold tracking-widest shadow-sm"
+         style="background:#fff; color:#E8192C; border:1px solid #F1F1F1">
+      GOOGLE REVIEWS
+    </div>
+  </div>
+</div>
+
+<!-- Reviews section -->
+<div class="relative mb-16">
+
+  <!-- background glow -->
+  <div class="absolute inset-0 rounded-[40px] opacity-40 blur-3xl pointer-events-none"
+       style="background:linear-gradient(135deg,#FFF0F1,#FFFFFF)">
+  </div>
+
+  <div class="relative bg-white/70 backdrop-blur-sm rounded-[32px] p-5 md:p-8 border shadow-sm"
+       style="border-color:#EFEFEF">
+
+    <GoogleReviews />
+
+      </div>
+    </div>
+
+    <!-- Location -->
+    <RestaurantLocation
               address="22 Rue de la Défense Passive, 14000 Caen"
               phone="+33 2 31 00 00 00"
               hours="Lun - Dim\n11:00 - 23:00"
@@ -151,6 +182,7 @@ import PopularCard     from '@/components/PopularCard.vue'
 import CartSidebar     from '@/components/CartSidebar.vue'
 import MobileCartBar   from '@/components/MobileCartBar.vue'
 import RestaurantLocation from '@/components/RestaurantLocation.vue'
+import GoogleReviews      from '@/components/GoogleReviews.vue'
 
 const store     = useRestaurantStore()
 const cartStore = useCartStore()
