@@ -1,6 +1,5 @@
 <template>
-  <div class="min-h-screen flex flex-col relative overflow-hidden bg-white">
-
+<div class="min-h-screen flex flex-col justify-center relative overflow-hidden bg-white">
     <div class="relative z-10 flex flex-col items-center w-full max-w-sm mx-auto px-4 pt-10 pb-8">
 
       <!-- LOGO circulaire -->
@@ -69,7 +68,7 @@
         </span>
         <span class="text-xs font-semibold rounded-full px-3 py-1.5"
               style="color:#1A1A1A; background:#F3F4F6;">
-          📦 Min. 10€
+          📦 Min. 20€
         </span>
         <span class="text-xs font-semibold rounded-full px-3 py-1.5"
               style="color:#1A1A1A; background:#F3F4F6;">

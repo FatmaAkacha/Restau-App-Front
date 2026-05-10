@@ -29,6 +29,13 @@
                 :style="store.isOpen ? 'background:#fff' : 'background:#888'" />
           {{ store.isOpen ? 'En ligne' : 'Hors ligne' }}
         </button>
+        <!-- Logout -->
+        <button @click="handleLogout"
+                class="flex items-center gap-1.5 px-3 py-2 rounded-full text-sm font-semibold transition-all"
+                style="background:#F5F5F5; color:#555"
+                title="Se déconnecter">
+          🚪 Déconnexion
+        </button>
       </div>
     </header>
 
@@ -213,7 +220,9 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { useRouter }      from 'vue-router'
 import { useAdminStore }  from '@/stores/adminStore'
+import { useAuthStore }   from '@/stores/authStore'
 import StatCard           from '@/components/admin/StatCard.vue'
 import OrderAlert         from '@/components/admin/OrderAlert.vue'
 import ActiveOrderCard    from '@/components/admin/ActiveOrderCard.vue'
@@ -221,6 +230,8 @@ import StatusBadge        from '@/components/StatusBadge.vue'
 import PaymentBadge       from '@/components/admin/PaymentBadge.vue'
 
 const store  = useAdminStore()
+const auth   = useAuthStore()
+const router = useRouter()
 const filter = ref('')
 
 const statuses = [
@@ -270,4 +281,10 @@ function timeAgo(dateStr) {
 let interval
 onMounted(() => { store.fetchAll(); interval = setInterval(store.fetchAll, 8000) })
 onUnmounted(() => clearInterval(interval))
+
+async function handleLogout() {
+  clearInterval(interval)
+  await auth.logout()
+  router.push('/admin/login')
+}
 </script>

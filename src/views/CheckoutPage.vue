@@ -52,13 +52,32 @@
 
           <!-- Livraison / À emporter -->
           <div class="flex gap-3 mt-4">
-            <button v-for="t in ['delivery','pickup']" :key="t"
-                    @click="form.type = t"
-                    class="flex-1 py-2.5 rounded-xl border text-sm font-semibold transition-all"
-                    :style="form.type === t
-                      ? 'border-color:#E8192C; background:#FFF0F1; color:#E8192C'
-                      : 'border-color:#E5E5E5; background:#fff; color:#888'">
-              {{ t === 'delivery' ? 'Livraison' : 'À emporter' }}
+            <!-- Livraison — disabled below MIN_ORDER -->
+            <button
+              @click="selectDelivery"
+              class="flex-1 py-2.5 rounded-xl border text-sm font-semibold transition-all relative"
+              :class="belowMinOrder ? 'cursor-not-allowed' : ''"
+              :style="form.type === 'delivery'
+                ? 'border-color:#E8192C; background:#FFF0F1; color:#E8192C'
+                : belowMinOrder
+                  ? 'border-color:#E5E5E5; background:#F9F9F9; color:#CCC'
+                  : 'border-color:#E5E5E5; background:#fff; color:#888'">
+              🚚 Livraison
+              <span v-if="belowMinOrder"
+                    class="block text-xs font-normal mt-0.5"
+                    style="color:#CCC">
+                Min. €{{ MIN_ORDER }}
+              </span>
+            </button>
+
+            <!-- À emporter — always available -->
+            <button
+              @click="form.type = 'pickup'"
+              class="flex-1 py-2.5 rounded-xl border text-sm font-semibold transition-all"
+              :style="form.type === 'pickup'
+                ? 'border-color:#E8192C; background:#FFF0F1; color:#E8192C'
+                : 'border-color:#E5E5E5; background:#fff; color:#888'">
+              🏃 À emporter
             </button>
           </div>
         </div>
@@ -159,6 +178,22 @@ let stripe = null, cardElement = null
 
 const deliveryFee = computed(() => form.value.type === 'pickup' ? 0 : 2.50)
 const total       = computed(() => cart.subtotal + deliveryFee.value)
+const MIN_ORDER   = 20
+
+// True when subtotal is below the delivery minimum
+const belowMinOrder = computed(() => cart.subtotal < MIN_ORDER)
+
+// Clicking "Livraison" when below minimum does nothing
+function selectDelivery() {
+  if (!belowMinOrder.value) form.value.type = 'delivery'
+}
+
+// Auto-switch to pickup if items are removed and subtotal drops below minimum
+watch(() => cart.subtotal, (val) => {
+  if (val < MIN_ORDER && form.value.type === 'delivery') {
+    form.value.type = 'pickup'
+  }
+})
 
 async function mountCard() {
   if (!stripe) return
@@ -194,6 +229,10 @@ async function placeOrder() {
   error.value = ''
   if (!form.value.customer_name || !form.value.customer_phone || !form.value.delivery_address) {
     error.value = 'Veuillez remplir tous les champs obligatoires.'
+    return
+  }
+  if (form.value.type === 'delivery' && cart.subtotal < MIN_ORDER) {
+    error.value = `Commande minimum de €${MIN_ORDER} pour la livraison.`
     return
   }
 

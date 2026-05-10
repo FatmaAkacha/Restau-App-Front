@@ -119,6 +119,13 @@
                 />
               </div>
             </div>
+
+            <RestaurantLocation
+              address="22 Rue de la Défense Passive, 14000 Caen"
+              phone="+33 2 31 00 00 00"
+              hours="Lun - Dim\n11:00 - 23:00"
+              mapUrl="https://www.google.com/maps?q=22+Rue+de+la+Défense+Passive,+14000+Caen&output=embed"
+            />
           </template>
 
         </div>
@@ -143,6 +150,7 @@ import MenuItemCard    from '@/components/MenuItemCard.vue'
 import PopularCard     from '@/components/PopularCard.vue'
 import CartSidebar     from '@/components/CartSidebar.vue'
 import MobileCartBar   from '@/components/MobileCartBar.vue'
+import RestaurantLocation from '@/components/RestaurantLocation.vue'
 
 const store     = useRestaurantStore()
 const cartStore = useCartStore()

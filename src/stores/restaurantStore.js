@@ -8,15 +8,23 @@ export const useRestaurantStore = defineStore('restaurant', () => {
   const error      = ref(null)
 
   async function fetchMenu() {
+    // Return early if already loaded — avoids redundant calls (e.g. CheckoutPage)
+    if (restaurant.value) return
+
     loading.value = true
     error.value   = null
     try {
-      // Fetch the list first to get the real ID (avoids hardcoded ID issues)
-      const list = await restaurantService.getAll()
-      const first = list.data?.[0]
-      if (!first) throw new Error('No restaurant found')
-
-      const { data } = await restaurantService.getMenu(first.id)
+      // Try the direct menu endpoint first (single round-trip).
+      // Falls back to list → menu if the direct call fails.
+      let data
+      try {
+        ;({ data } = await restaurantService.getMenu(1))
+      } catch {
+        const list = await restaurantService.getAll()
+        const first = list.data?.[0]
+        if (!first) throw new Error('No restaurant found')
+        ;({ data } = await restaurantService.getMenu(first.id))
+      }
       restaurant.value = data
     } catch (e) {
       error.value = 'Impossible de charger le menu.'

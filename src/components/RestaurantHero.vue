@@ -1,8 +1,7 @@
 <template>
   <div class="relative">
     <!-- Cover simple white/gray -->
-    <div class="h-40 md:h-48 overflow-hidden relative"
-         style="background:#FAFAFA">
+    <div class="overflow-hidden relative" style="background:#FAFAFA">
       <!-- Subtle pattern -->
       <div class="absolute inset-0 opacity-5"
            style="background-image:radial-gradient(circle, #1A1A1A 1px, transparent 1px);
@@ -14,7 +13,7 @@
 
     <!-- Info bar -->
     <div class="max-w-6xl mx-auto px-4">
-      <div class="flex items-end gap-4 -mt-10 pb-4 relative z-10">
+      <div class="flex items-end gap-4 pb-4 relative z-10">
         <!-- Logo circulaire -->
         <div class="w-20 h-20 rounded-full flex items-center justify-center flex-shrink-0 
                     border-4 border-white shadow-lg overflow-hidden"
@@ -34,14 +33,12 @@
           <p class="text-xs mt-0.5" style="color:#888">
             Cheese Naan · Tortilla · Tacos · Bowls · Pizza
           </p>
-          <p class="text-xs mt-0.5" style="color:#AAA">
-            📍 22 Rue de la Défense Passive, 14000 Caen
-          </p>
+
         </div>
       </div>
 
       <!-- Stats row -->
-      <div class="flex flex-wrap gap-4 text-sm pb-4"
+      <div class="flex flex-wrap gap-4 text-sm pb-"
            style="border-bottom:1px solid #E5E5E5">
         <span class="flex items-center gap-1" style="color:#555">
           ⭐ <strong style="color:#1A1A1A">{{ restaurant.rating }}</strong>
@@ -61,6 +58,7 @@
           {{ restaurant.is_open ? 'Ouvert' : 'Fermé' }}
         </span>
       </div>
+      
     </div>
   </div>
 </template>
