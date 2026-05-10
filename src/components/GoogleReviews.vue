@@ -34,11 +34,11 @@
       <p class="text-sm" style="color:#888">Basé sur 270+ avis</p>
 
       <!-- CTA -->
-      <a href="https://g.page/r/goodnaan/review"
+      <a :href="reviewUrl"
          target="_blank" rel="noopener noreferrer"
-         class="mt-4 flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold transition-all"
+         class="mt-4 flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold transition-all hover:opacity-80"
          style="background:#FFF0F1; color:#E8192C; border:1.5px solid #FFCDD0">
-        ✍️ Laisser un avis
+        ✍️ Laisser un avis Google
       </a>
     </div>
 
@@ -85,6 +85,17 @@
 </template>
 
 <script setup>
+// Google Maps write-review URL for Good Naan Caen.
+// Format: https://search.google.com/local/writereview?placeid=PLACE_ID
+// Replace PLACE_ID below with the actual Google Place ID once retrieved from
+// Google Maps (click the business → Share → Copy link, or use the Place ID Finder).
+// Until then, the search URL opens the business listing where the user can click "Donner un avis".
+const PLACE_ID = 'ChIJ_____REPLACE_ME_____'  // ← paste your Place ID here
+
+const reviewUrl = PLACE_ID.includes('REPLACE_ME')
+  ? 'https://www.google.com/maps/search/Good+Naan+22+Rue+de+la+D%C3%A9fense+Passive+Caen'
+  : `https://search.google.com/local/writereview?placeid=${PLACE_ID}`
+
 const reviews = [
   {
     id: 1,
