@@ -20,7 +20,7 @@
            class="flex items-center gap-3 py-3"
            style="border-bottom:1px solid #F0F0F0">
         <div class="flex items-center gap-1.5">
-          <button @click="cart.removeItem(item.id)"
+          <button @click="cart.removeItem(item.cartKey || item.id)"
                   class="w-6 h-6 rounded-full border flex items-center justify-center text-sm font-bold
                          transition-colors hover:border-red-500 hover:text-red-500"
                   style="border-color:#E5E5E5; color:#888">−</button>
@@ -29,7 +29,12 @@
                   class="w-6 h-6 rounded-full text-white flex items-center justify-center text-sm font-bold"
                   style="background:#E8192C">+</button>
         </div>
-        <span class="flex-1 text-sm truncate" style="color:#1A1A1A">{{ item.name }}</span>
+        <span class="flex-1 text-sm truncate" style="color:#1A1A1A">
+            {{ item.name }}
+            <span v-if="item.summary" class="block text-xs font-normal mt-0.5 truncate" style="color:#888">
+              {{ item.summary }}
+            </span>
+          </span>
         <span class="text-sm font-bold" style="color:#1A1A1A">€{{ (item.price * item.quantity).toFixed(2) }}</span>
       </div>
 

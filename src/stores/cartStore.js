@@ -15,7 +15,9 @@ export const useCartStore = defineStore('cart', () => {
     }
     restaurantId.value = menuItem.restaurant_id
 
-    const existing = items.value.find(i => i.id === menuItem.id)
+    // Items with customization use cartKey to distinguish different option combos
+    const key      = menuItem.cartKey || String(menuItem.id)
+    const existing = items.value.find(i => (i.cartKey || String(i.id)) === key)
     if (existing) {
       existing.quantity++
     } else {
@@ -24,7 +26,7 @@ export const useCartStore = defineStore('cart', () => {
   }
 
   function removeItem(id) {
-    const idx = items.value.findIndex(i => i.id === id)
+    const idx = items.value.findIndex(i => (i.cartKey || String(i.id)) === String(id))
     if (idx === -1) return
     if (items.value[idx].quantity > 1) {
       items.value[idx].quantity--
