@@ -96,10 +96,12 @@
               <span>Sous-total</span>
               <span>€{{ cart.subtotal.toFixed(2) }}</span>
             </div>
-            <div class="flex justify-between" style="color:#888">
-              <span>Frais de livraison</span>
-              <span>{{ form.type === 'pickup' ? 'Gratuit' : '€2.50' }}</span>
-            </div>
+           <div v-if="form.type === 'delivery' && cart.subtotal >= MIN_ORDER"
+              class="flex justify-between"
+              style="color:#888">
+            <span>Frais de livraison</span>
+            <span>€2.50</span>
+          </div>
             <div class="flex justify-between font-bold text-base pt-3"
                  style="border-top:1px solid #E5E5E5; color:#1A1A1A">
               <span>Total</span>
@@ -176,7 +178,11 @@ const stripeError   = ref('')
 
 let stripe = null, cardElement = null
 
-const deliveryFee = computed(() => form.value.type === 'pickup' ? 0 : 2.50)
+const deliveryFee = computed(() => {
+  if (form.value.type === 'pickup') return 0
+  if (cart.subtotal < MIN_ORDER) return 0
+  return 2.50
+})
 const total       = computed(() => cart.subtotal + deliveryFee.value)
 const MIN_ORDER   = 20
 

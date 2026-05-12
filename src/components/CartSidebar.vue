@@ -38,13 +38,10 @@
         <div class="flex justify-between" style="color:#888">
           <span>Sous-total</span><span>€{{ cart.subtotal.toFixed(2) }}</span>
         </div>
-        <div class="flex justify-between" style="color:#888">
-          <span>Frais de livraison</span><span>€2.50</span>
-        </div>
         <div class="flex justify-between font-bold text-base pt-3"
              style="border-top:1px solid #E5E5E5; color:#1A1A1A">
           <span>Total</span>
-          <span style="color:#E8192C">€{{ (cart.subtotal + 2.50).toFixed(2) }}</span>
+          <span style="color:#E8192C">€{{ (cart.subtotal).toFixed(2) }}</span>
         </div>
       </div>
 
