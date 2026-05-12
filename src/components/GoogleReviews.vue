@@ -23,15 +23,23 @@
         <span class="text-sm font-semibold" style="color:#555">Avis Google</span>
       </div>
 
-      <div class="text-6xl font-black mb-2" style="color:#1A1A1A">4.2</div>
+      <div class="text-6xl font-black mb-2" style="color:#1A1A1A">
+        <span v-if="rating !== null">{{ rating }}</span>
+        <span v-else class="inline-block w-20 h-14 rounded-xl bg-gray-200 animate-pulse align-middle" />
+      </div>
 
       <!-- Stars -->
       <div class="flex gap-1 mb-2">
-        <span v-for="i in 5" :key="i" class="text-2xl">
-          {{ i <= 4 ? '★' : '☆' }}
-        </span>
+        <span v-for="i in 5" :key="i" class="text-2xl" :style="i <= Math.round(rating ?? 0) ? 'color:#FBBC05' : 'color:#E5E5E5'">★</span>
       </div>
-      <p class="text-sm" style="color:#888">Basé sur 270+ avis</p>
+      <p class="text-sm" style="color:#888">
+        Basé sur
+        <span v-if="loading" class="inline-block w-10 h-3 rounded bg-gray-200 animate-pulse align-middle" />
+        <span v-else>{{ reviewCount }}+</span>
+        avis
+        <span v-if="source === 'google'" class="ml-1 text-xs px-1.5 py-0.5 rounded-full font-medium"
+              style="background:#E8F5E9; color:#2E7D32">● live</span>
+      </p>
 
       <!-- CTA -->
       <a :href="reviewUrl"
@@ -85,16 +93,13 @@
 </template>
 
 <script setup>
-// Google Maps write-review URL for Good Naan Caen.
-// Format: https://search.google.com/local/writereview?placeid=PLACE_ID
-// Replace PLACE_ID below with the actual Google Place ID once retrieved from
-// Google Maps (click the business → Share → Copy link, or use the Place ID Finder).
-// Until then, the search URL opens the business listing where the user can click "Donner un avis".
-const PLACE_ID = 'ChIJ_____REPLACE_ME_____'  // ← paste your Place ID here
+import { useGoogleRating } from '@/composables/useGoogleRating'
 
-const reviewUrl = PLACE_ID.includes('REPLACE_ME')
-  ? 'https://www.google.com/maps/search/Good+Naan+22+Rue+de+la+D%C3%A9fense+Passive+Caen'
-  : `https://search.google.com/local/writereview?placeid=${PLACE_ID}`
+const { rating, reviewCount, source, loading } = useGoogleRating()
+
+// Direct write-review link — uses the Place ID from the Google Maps URL
+const PLACE_ID  = 'ChIJG05GvlujQEgRUlGSMjQrKEo'
+const reviewUrl = `https://search.google.com/local/writereview?placeid=${PLACE_ID}`
 
 const reviews = [
   {

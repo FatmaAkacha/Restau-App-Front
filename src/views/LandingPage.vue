@@ -80,8 +80,10 @@
       <div class="flex items-center justify-center gap-3 mb-5">
         <div class="flex items-center gap-1.5 rounded-full px-3 py-1.5 bg-gray-100">
           <span class="text-yellow-500 text-sm">⭐</span>
-          <span class="font-bold text-sm text-gray-900">4.2</span>
-          <span class="text-xs text-gray-500">(270+)</span>
+          <span v-if="rating !== null" class="font-bold text-sm text-gray-900">{{ rating }}</span>
+          <span v-else class="inline-block w-6 h-3 rounded bg-gray-300 animate-pulse" />
+          <span v-if="reviewCount !== null" class="text-xs text-gray-500">({{ reviewCount }}+)</span>
+          <span v-else class="inline-block w-8 h-3 rounded bg-gray-200 animate-pulse" />
         </div>
 
         <div class="flex items-center gap-1.5 rounded-full px-3 py-1.5 bg-gray-100">
@@ -109,6 +111,8 @@
 </template>
 
 <script setup>
-import { useOpenStatus } from '@/composables/useOpenStatus'
-const { isOpen } = useOpenStatus()
+import { useOpenStatus }   from '@/composables/useOpenStatus'
+import { useGoogleRating } from '@/composables/useGoogleRating'
+const { isOpen }                = useOpenStatus()
+const { rating, reviewCount }   = useGoogleRating()
 </script>

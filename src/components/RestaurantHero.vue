@@ -41,8 +41,11 @@
       <div class="flex flex-wrap gap-4 text-sm pb-"
            style="border-bottom:1px solid #E5E5E5">
         <span class="flex items-center gap-1" style="color:#555">
-          ⭐ <strong style="color:#1A1A1A">{{ restaurant.rating }}</strong>
-          <span style="color:#888">({{ restaurant.rating_count }}+)</span>
+          ⭐
+          <strong v-if="rating !== null" style="color:#1A1A1A">{{ rating }}</strong>
+          <span v-else class="inline-block w-6 h-3 rounded bg-gray-200 animate-pulse align-middle" />
+          <span v-if="reviewCount !== null" style="color:#888">({{ reviewCount }}+)</span>
+          <span v-else class="inline-block w-10 h-3 rounded bg-gray-100 animate-pulse align-middle" />
         </span>
         <span style="color:#555">🕐 {{ restaurant.delivery_time }} min</span>
         <span style="color:#555">
@@ -65,9 +68,11 @@
 </template>
 
 <script setup>
-import { useOpenStatus } from '@/composables/useOpenStatus'
+import { useOpenStatus }   from '@/composables/useOpenStatus'
+import { useGoogleRating } from '@/composables/useGoogleRating'
 
 defineProps({ restaurant: Object })
 
-const { isOpen, nextChange } = useOpenStatus()
+const { isOpen, nextChange }    = useOpenStatus()
+const { rating, reviewCount }   = useGoogleRating()
 </script>
