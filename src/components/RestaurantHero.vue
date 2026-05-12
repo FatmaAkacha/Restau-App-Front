@@ -13,7 +13,7 @@
 
     <!-- Info bar -->
     <div class="max-w-6xl mx-auto px-4">
-      <div class="flex items-end gap-4 pb-4 relative z-10">
+      <div class="flex items-end gap-4 pb-4 mt-[2%] relative z-10">
         <!-- Logo circulaire -->
         <div class="w-20 h-20 rounded-full flex items-center justify-center flex-shrink-0 
                     border-4 border-white shadow-lg overflow-hidden"
@@ -49,13 +49,14 @@
           🚚 {{ restaurant.delivery_fee === 0 ? 'Livraison gratuite' : `€${restaurant.delivery_fee} livraison` }}
         </span>
         <span style="color:#555">📦 Min. €{{ restaurant.min_order }}</span>
-        <span class="font-semibold flex items-center gap-1"
-              :style="restaurant.is_open ? 'color:#16a34a' : 'color:#E8192C'">
-          <span class="w-2 h-2 rounded-full inline-block"
-                :style="restaurant.is_open
+        <span class="font-semibold flex items-center gap-1.5"
+              :style="isOpen ? 'color:#16a34a' : 'color:#E8192C'">
+          <span class="w-2 h-2 rounded-full inline-block flex-shrink-0"
+                :style="isOpen
                   ? 'background:#16a34a; animation:pulse 2s infinite'
                   : 'background:#E8192C'" />
-          {{ restaurant.is_open ? 'Ouvert' : 'Fermé' }}
+          {{ isOpen ? 'Ouvert' : 'Fermé' }}
+          <span class="font-normal text-xs" style="color:#AAA">· {{ nextChange }}</span>
         </span>
       </div>
       
@@ -64,5 +65,9 @@
 </template>
 
 <script setup>
+import { useOpenStatus } from '@/composables/useOpenStatus'
+
 defineProps({ restaurant: Object })
+
+const { isOpen, nextChange } = useOpenStatus()
 </script>

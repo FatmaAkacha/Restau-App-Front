@@ -85,8 +85,12 @@
         </div>
 
         <div class="flex items-center gap-1.5 rounded-full px-3 py-1.5 bg-gray-100">
-          <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-          <span class="font-semibold text-sm text-green-600">Ouvert</span>
+          <span class="w-2 h-2 rounded-full flex-shrink-0"
+                :class="isOpen ? 'bg-green-500 animate-pulse' : 'bg-red-500'" />
+          <span class="font-semibold text-sm"
+                :class="isOpen ? 'text-green-600' : 'text-red-600'">
+            {{ isOpen ? 'Ouvert' : 'Fermé' }}
+          </span>
         </div>
       </div>
 
@@ -103,3 +107,8 @@
     </div>
   </div>
 </template>
+
+<script setup>
+import { useOpenStatus } from '@/composables/useOpenStatus'
+const { isOpen } = useOpenStatus()
+</script>
