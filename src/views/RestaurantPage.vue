@@ -1,9 +1,44 @@
 <template>
   <div class="min-h-screen" style="background:#F7F7F7">
 
-    <div v-if="store.loading" class="flex items-center justify-center h-screen">
-      <div class="w-10 h-10 border-4 rounded-full animate-spin"
-           style="border-color:#E8192C; border-top-color:transparent" />
+    <div v-if="store.loading" class="max-w-6xl mx-auto px-4 pt-4 pb-32 lg:flex lg:gap-8">
+      <!-- Main skeleton -->
+      <div class="flex-1 min-w-0 animate-pulse">
+        <!-- Hero skeleton -->
+        <div class="flex items-center gap-4 py-4 mb-2" style="border-bottom:1px solid #E5E5E5">
+          <div class="w-20 h-20 rounded-full bg-gray-200 flex-shrink-0" />
+          <div class="space-y-2">
+            <div class="h-6 w-40 rounded-lg bg-gray-200" />
+            <div class="h-3 w-56 rounded bg-gray-100" />
+          </div>
+        </div>
+        <!-- Search bar skeleton -->
+        <div class="h-9 rounded-xl bg-gray-100 my-4" />
+        <!-- Category nav skeleton -->
+        <div class="flex gap-2 mb-6">
+          <div v-for="i in 5" :key="i" class="h-8 w-20 rounded-full bg-gray-100" />
+        </div>
+        <!-- Cards skeleton -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div v-for="i in 8" :key="i"
+               class="rounded-2xl bg-white border p-3 flex gap-3"
+               style="border-color:#F0F0F0">
+            <div class="w-20 h-20 rounded-xl bg-gray-100 flex-shrink-0" />
+            <div class="flex-1 space-y-2 py-1">
+              <div class="h-4 w-3/4 rounded bg-gray-100" />
+              <div class="h-3 w-full rounded bg-gray-50" />
+              <div class="h-3 w-1/2 rounded bg-gray-50" />
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Cart skeleton (desktop) -->
+      <div class="hidden lg:block w-80 flex-shrink-0">
+        <div class="rounded-2xl bg-white border p-4 animate-pulse" style="border-color:#F0F0F0">
+          <div class="h-5 w-32 rounded bg-gray-100 mb-4" />
+          <div class="h-24 rounded-xl bg-gray-50" />
+        </div>
+      </div>
     </div>
 
     <div v-else-if="store.error"
