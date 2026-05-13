@@ -6,7 +6,27 @@ export const useCartStore = defineStore('cart', () => {
   const restaurantId = ref(null)
 
   const itemCount = computed(() => items.value.reduce((s, i) => s + i.quantity, 0))
-  const subtotal  = computed(() => items.value.reduce((s, i) => s + i.price * i.quantity, 0))
+const subtotal = computed(() => {
+  return items.value.reduce((s, i) => {
+    const extrasTotal = (i.extras || []).reduce(
+      (sum, e) => sum + Number(e.price || 0),
+      0
+    )
+
+    const itemTotal =
+      (Number(i.price) + extrasTotal) * Number(i.quantity)
+
+    return s + itemTotal
+  }, 0)
+})
+function getItemTotal(item) {
+  const extrasTotal = (item.extras || []).reduce(
+    (sum, e) => sum + Number(e.price || 0),
+    0
+  )
+
+  return (Number(item.price) + extrasTotal) * Number(item.quantity)
+}
 
   function addItem(menuItem) {
     // If adding from a different restaurant, clear cart first

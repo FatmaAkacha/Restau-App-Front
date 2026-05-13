@@ -131,17 +131,7 @@
               </p>
             </div>
 
-            <!-- Notes libres -->
-            <div>
-              <h3 class="font-bold text-sm mb-2" style="color:#1A1A1A">Notes / Allergies</h3>
-              <textarea v-model="notes"
-                        rows="2"
-                        placeholder="Ex : sans oignons, allergie aux noix…"
-                        class="w-full rounded-xl px-3 py-2.5 text-sm resize-none outline-none transition-all"
-                        style="border:1.5px solid #E5E5E5; color:#1A1A1A"
-                        @focus="e => e.target.style.borderColor='#E8192C'"
-                        @blur="e => e.target.style.borderColor='#E5E5E5'" />
-            </div>
+            
           </div>
 
           <!-- Footer CTA -->

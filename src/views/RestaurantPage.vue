@@ -167,7 +167,7 @@
                     v-for="item in group.items"
                     :key="item.id"
                     :item="item"
-                    @add="cartStore.addItem(item)"
+                    @add="cartStore.addItem($event)"
                   />
                 </div>
 
@@ -210,7 +210,7 @@
                 >
                   <PopularCard
                     :item="item"
-                    @add="cartStore.addItem(item)"
+                    @add="cartStore.addItem($event)"
                   />
                 </div>
               </div>
@@ -240,7 +240,7 @@
                   v-for="item in cat.menu_items"
                   :key="item.id"
                   :item="item"
-                  @add="cartStore.addItem(item)"
+                  @add="cartStore.addItem($event)"
                 />
               </div>
             </div>

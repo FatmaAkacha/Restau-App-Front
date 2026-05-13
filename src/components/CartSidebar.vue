@@ -35,7 +35,7 @@
               {{ item.summary }}
             </span>
           </span>
-        <span class="text-sm font-bold" style="color:#1A1A1A">€{{ (item.price * item.quantity).toFixed(2) }}</span>
+        <span class="text-sm font-bold" style="color:#1A1A1A">€{{ (Number(item.price) * item.quantity).toFixed(2) }}</span>
       </div>
 
       <!-- Totaux -->
