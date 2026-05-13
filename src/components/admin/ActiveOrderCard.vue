@@ -13,9 +13,15 @@
     </div>
 
     <!-- Articles -->
-    <div class="text-xs space-y-0.5" style="color:#555">
+    <div class="text-xs space-y-1" style="color:#555">
       <div v-for="item in order.items" :key="item.id">
-        {{ item.quantity }}× {{ item.name }}
+        <span>{{ item.quantity }}× {{ item.name }}</span>
+        <span v-if="item.customization_summary" class="block pl-3 mt-0.5" style="color:#E8192C">
+          ↳ {{ item.customization_summary }}
+        </span>
+        <span v-if="item.notes" class="block pl-3 mt-0.5 italic" style="color:#AAA">
+          📝 {{ item.notes }}
+        </span>
       </div>
     </div>
 

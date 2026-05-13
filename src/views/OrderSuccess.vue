@@ -65,10 +65,18 @@
         <div class="text-left mb-5">
           <h3 class="font-semibold text-sm mb-2" style="color:#1A1A1A">Vos articles</h3>
           <div v-for="item in order.items" :key="item.id"
-               class="flex justify-between text-sm py-2 border-b last:border-0"
+               class="py-2 border-b last:border-0"
                style="border-color:#F0F0F0">
-            <span style="color:#555">{{ item.quantity }}× {{ item.name }}</span>
-            <span class="font-medium" style="color:#1A1A1A">€{{ (item.price * item.quantity).toFixed(2) }}</span>
+            <div class="flex justify-between text-sm">
+              <span style="color:#555">{{ item.quantity }}× {{ item.name }}</span>
+              <span class="font-medium" style="color:#1A1A1A">€{{ (item.price * item.quantity).toFixed(2) }}</span>
+            </div>
+            <p v-if="item.customization_summary" class="text-xs mt-0.5 pl-4" style="color:#888">
+              {{ item.customization_summary }}
+            </p>
+            <p v-if="item.notes" class="text-xs mt-0.5 pl-4 italic" style="color:#AAA">
+              📝 {{ item.notes }}
+            </p>
           </div>
         </div>
 

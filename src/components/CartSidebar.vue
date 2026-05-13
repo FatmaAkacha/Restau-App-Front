@@ -16,7 +16,7 @@
     </div>
 
     <div v-else>
-      <div v-for="item in cart.items" :key="item.id"
+      <div v-for="item in cart.items" :key="item.cartKey || item.id"
            class="flex items-center gap-3 py-3"
            style="border-bottom:1px solid #F0F0F0">
         <div class="flex items-center gap-1.5">

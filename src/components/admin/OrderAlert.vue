@@ -49,11 +49,18 @@
       </div>
 
       <!-- Articles -->
-      <div class="rounded-xl p-3 space-y-1" style="background:#F7F7F7">
-        <div v-for="item in order.items" :key="item.id"
-             class="flex justify-between text-sm">
-          <span style="color:#555">{{ item.quantity }}× {{ item.name }}</span>
-          <span class="font-semibold" style="color:#1A1A1A">€{{ (item.price * item.quantity).toFixed(2) }}</span>
+      <div class="rounded-xl p-3 space-y-1.5" style="background:#F7F7F7">
+        <div v-for="item in order.items" :key="item.id" class="text-sm">
+          <div class="flex justify-between">
+            <span style="color:#555">{{ item.quantity }}× {{ item.name }}</span>
+            <span class="font-semibold" style="color:#1A1A1A">€{{ (item.price * item.quantity).toFixed(2) }}</span>
+          </div>
+          <p v-if="item.customization_summary" class="text-xs pl-4 mt-0.5" style="color:#E8192C">
+            ↳ {{ item.customization_summary }}
+          </p>
+          <p v-if="item.notes" class="text-xs pl-4 mt-0.5 italic" style="color:#AAA">
+            📝 {{ item.notes }}
+          </p>
         </div>
       </div>
 

@@ -9,7 +9,7 @@
           {{ cart.itemCount }}
         </span>
         <span class="font-bold">Voir le panier</span>
-        <span class="font-bold">€{{ (cart.subtotal + 2.50).toFixed(2) }}</span>
+        <span class="font-bold">€{{ cart.subtotal.toFixed(2) }}</span>
       </button>
     </router-link>
   </div>

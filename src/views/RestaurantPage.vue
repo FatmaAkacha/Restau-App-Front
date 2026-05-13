@@ -188,7 +188,7 @@
     <!-- Location -->
     <RestaurantLocation
               address="22 Rue de la Défense Passive, 14000 Caen"
-              phone="+33 2 31 00 00 00"
+              phone="+33 2 59 16 04 30"
               mapUrl="https://www.google.com/maps?q=22+Rue+de+la+Défense+Passive,+14000+Caen&output=embed"
             />
           </template>

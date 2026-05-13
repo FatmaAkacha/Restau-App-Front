@@ -44,9 +44,15 @@
               <input v-model="form.delivery_address" type="text" placeholder="12 Rue de la Paix, Caen" class="input" />
             </div>
             <div class="sm:col-span-2">
-              <label class="block text-xs font-medium mb-1.5" style="color:#888">Notes</label>
-              <textarea v-model="form.notes" rows="2" placeholder="Allergies, demandes spéciales…"
+              <label class="block text-xs font-medium mb-1.5" style="color:#888">Notes générales</label>
+              <textarea v-model="form.notes" rows="2" placeholder="Allergies, demandes spéciales pour toute la commande…"
                         class="input resize-none" />
+              <!-- Item-level notes summary -->
+              <div v-if="itemNotesSummary" class="mt-2 rounded-xl px-3 py-2 text-xs"
+                   style="background:#FFF8F0; border:1px solid #FFD9A0; color:#92400E">
+                <p class="font-semibold mb-1">📝 Notes par article :</p>
+                <p class="whitespace-pre-line">{{ itemNotesSummary }}</p>
+              </div>
             </div>
           </div>
 
@@ -85,11 +91,30 @@
         <!-- Récapitulatif -->
         <div class="card p-5">
           <h2 class="font-bold text-base mb-4" style="color:#1A1A1A">🧾 Récapitulatif</h2>
-          <div v-for="item in cart.items" :key="item.id"
-               class="flex justify-between text-sm py-2.5"
+          <div v-for="item in cart.items" :key="item.cartKey || item.id"
+               class="py-3"
                style="border-bottom:1px solid #F0F0F0">
-            <span style="color:#555">{{ item.quantity }}× {{ item.name }}</span>
-            <span class="font-semibold" style="color:#1A1A1A">€{{ (item.price * item.quantity).toFixed(2) }}</span>
+            <div class="flex justify-between text-sm">
+              <div class="flex items-start gap-2 flex-1 min-w-0">
+                <!-- Quantity badge -->
+                <span class="flex-shrink-0 w-5 h-5 rounded-full text-white text-xs font-bold flex items-center justify-center mt-0.5"
+                      style="background:#E8192C">{{ item.quantity }}</span>
+                <div class="min-w-0">
+                  <p class="font-medium truncate" style="color:#1A1A1A">{{ item.name }}</p>
+                  <!-- Viande / Sauce / Extras summary -->
+                  <p v-if="item.summary" class="text-xs mt-0.5" style="color:#E8192C">
+                    {{ item.summary }}
+                  </p>
+                  <!-- Item-level notes/allergies -->
+                  <p v-if="item.notes" class="text-xs mt-0.5 italic" style="color:#AAA">
+                    📝 {{ item.notes }}
+                  </p>
+                </div>
+              </div>
+              <span class="font-semibold flex-shrink-0 ml-3" style="color:#1A1A1A">
+                €{{ (item.price * item.quantity).toFixed(2) }}
+              </span>
+            </div>
           </div>
           <div class="mt-4 space-y-2 text-sm">
             <div class="flex justify-between" style="color:#888">
@@ -189,6 +214,14 @@ const MIN_ORDER   = 20
 // True when subtotal is below the delivery minimum
 const belowMinOrder = computed(() => cart.subtotal < MIN_ORDER)
 
+// Compile all item-level notes/allergies from customized items into a readable summary
+const itemNotesSummary = computed(() => {
+  const lines = cart.items
+    .filter(i => i.notes && i.notes.trim())
+    .map(i => `• ${i.name} : ${i.notes.trim()}`)
+  return lines.join('\n')
+})
+
 // Clicking "Livraison" when below minimum does nothing
 function selectDelivery() {
   if (!belowMinOrder.value) form.value.type = 'delivery'
@@ -254,7 +287,19 @@ async function placeOrder() {
     const { data: order } = await orderService.create({
       restaurant_id: restaurantId,
       ...form.value,
-      items: cart.items.map(i => ({ menu_item_id: i.id, quantity: i.quantity }))
+      // Merge order-level notes with item-level notes summary for the admin
+      notes: [
+        form.value.notes,
+        itemNotesSummary.value
+      ].filter(Boolean).join('\n\n') || null,
+      items: cart.items.map(i => ({
+        menu_item_id:          i.id,
+        quantity:              i.quantity,
+        unit_price:            i.price,
+        notes:                 i.notes || null,
+        customization:         i.selections || null,
+        customization_summary: i.summary   || null,
+      }))
     })
     if (paymentMethod.value === 'card') {
       const { data: intent } = await paymentService.createIntent(order.id)
