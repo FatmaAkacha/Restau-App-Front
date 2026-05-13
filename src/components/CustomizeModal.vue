@@ -228,19 +228,6 @@ function toggleChoice(group, choice) {
 
 // ── Preview image ──────────────────────────────────────────────────────
 const previewImage = computed(() => {
-  const viande = props.item?.customization_options?.find(
-    g => g.group === 'viande'
-  )
-
-  if (viande) {
-    const selectedKey = (selections.value['viande'] || [])[0]
-    const choice = viande.choices.find(c => c.key === selectedKey)
-
-    if (choice) {
-      return viandeImage(choice)
-    }
-  }
-
   return props.item?.image || null
 })
 
