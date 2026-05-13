@@ -82,8 +82,12 @@
                       <img v-if="choice.image"
                            :src="`/images/menu/${choice.image}`"
                            :alt="choice.label"
-                           class="w-full h-full object-cover"
-                           :class="choice.key === 'merguez' ? 'object-contain p-1.5 scale-75' : 'object-cover'"
+                           class="w-full h-full"
+                           :class="choice.key === 'merguez'
+                             ? 'object-contain p-1.5 scale-75'
+                             : ['tenders','nuggets'].includes(choice.key)
+                               ? 'object-contain p-2 scale-90'
+                               : 'object-cover'"
                            @error="e => { e.target.style.display='none'; e.target.nextElementSibling.style.display='flex' }" />
                       <div class="w-full h-full absolute inset-0 items-center justify-center text-2xl"
                            :style="choice.image ? 'display:none' : 'display:flex'">
@@ -158,35 +162,57 @@
     </Transition>
   </Teleport>
 </template>
-
 <script setup>
 import { ref, computed, watch } from 'vue'
 
-const props = defineProps({ item: Object })
-const emit  = defineEmits(['close', 'add'])
+const props = defineProps({
+  item: Object
+})
 
-// selections: { [groupKey]: string[] }
+const emit = defineEmits(['close', 'add'])
+
+// ── State ──────────────────────────────────────────────────────────────
 const selections = ref({})
-const notes      = ref('')
+const notes = ref('')
 
-// Reset when item changes
+// Reset when modal item changes
 watch(() => props.item, () => {
   selections.value = {}
   notes.value = ''
 })
 
-// ── Emoji fallback per viande key ────────────────────────────────────────────
+// ── Emoji fallback ─────────────────────────────────────────────────────
 function viandEmoji(key) {
   const map = {
-    tandoori: '🍗', curry: '🍛', oriental: '🥙', kefta: '🥩',
-    merguez:  '', steak: '🥩', escalope: '🍖', cordon: '🧀',
-    tenders:  '🍗', nuggets: '🍗', falafel: '🧆',
+    tandoori: '🍗',
+    curry: '🍛',
+    oriental: '🥙',
+    kefta: '🥩',
+    merguez: '🌭',
+    steak: '🥩',
+    escalope: '🍖',
+    cordon: '🧀',
+    tenders: '🍗',
+    nuggets: '🍗',
+    falafel: '🧆',
   }
+
   return map[key] || '🥩'
 }
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
+// ── Auto images for viande options ────────────────────────────────────
+function viandeImage(choice) {
+  const images = {
+    cordon: 'codonbleu_option.jpg',
+    escalope: 'escalope_option.png',
+    nuggets: 'nuggets_option.png',
+    tenders: 'tenders_option.png',
+  }
 
+  return choice.image || images[choice.key] || null
+}
+
+// ── Helpers ────────────────────────────────────────────────────────────
 function isSelected(group, choice) {
   return (selections.value[group.group] || []).includes(choice.key)
 }
@@ -197,83 +223,106 @@ function hasSelection(group) {
 
 function toggleChoice(group, choice) {
   const current = selections.value[group.group] || []
-  const idx     = current.indexOf(choice.key)
+  const idx = current.indexOf(choice.key)
 
   if (idx !== -1) {
-    // Deselect
     selections.value[group.group] = current.filter(k => k !== choice.key)
   } else {
     if (group.max === 1) {
-      // Single-select: replace
       selections.value[group.group] = [choice.key]
     } else if (current.length < group.max) {
-      // Multi-select: add if under limit
       selections.value[group.group] = [...current, choice.key]
     }
-    // else: at max, ignore click
   }
 }
 
-// ── Preview image: use first selected viande image, else item default ────────
+// ── Preview image ──────────────────────────────────────────────────────
 const previewImage = computed(() => {
-  const viande = props.item?.customization_options?.find(g => g.group === 'viande')
+  const viande = props.item?.customization_options?.find(
+    g => g.group === 'viande'
+  )
+
   if (viande) {
     const selectedKey = (selections.value['viande'] || [])[0]
     const choice = viande.choices.find(c => c.key === selectedKey)
-    if (choice?.image) return choice.image
+
+    if (choice) {
+      return viandeImage(choice)
+    }
   }
+
   return props.item?.image || null
 })
 
-// ── Price: base + extras ─────────────────────────────────────────────────────
+// ── Price ──────────────────────────────────────────────────────────────
 const totalPrice = computed(() => {
   if (!props.item) return 0
+
   let price = props.item.price
+
   for (const group of props.item.customization_options || []) {
     if (group.price_each) {
-      price += (selections.value[group.group] || []).length * group.price_each
+      price +=
+        (selections.value[group.group] || []).length *
+        group.price_each
     }
   }
+
   return price
 })
 
-// ── Can confirm: all required groups have a selection ────────────────────────
+// ── Validation ─────────────────────────────────────────────────────────
 const canConfirm = computed(() => {
   if (!props.item) return false
+
   for (const group of props.item.customization_options || []) {
-    if (group.required && !hasSelection(group)) return false
+    if (group.required && !hasSelection(group)) {
+      return false
+    }
   }
+
   return true
 })
 
-// ── Build human-readable summary for cart ────────────────────────────────────
+// ── Cart summary ───────────────────────────────────────────────────────
 function buildSummary() {
   const parts = []
+
   for (const group of props.item.customization_options || []) {
     const keys = selections.value[group.group] || []
+
     if (!keys.length) continue
-    const labels = keys.map(k => group.choices.find(c => c.key === k)?.label || k)
+
+    const labels = keys.map(
+      k => group.choices.find(c => c.key === k)?.label || k
+    )
+
     parts.push(labels.join(', '))
   }
-  if (notes.value.trim()) parts.push(`📝 ${notes.value.trim()}`)
+
+  if (notes.value.trim()) {
+    parts.push(`📝 ${notes.value.trim()}`)
+  }
+
   return parts.join(' · ')
 }
 
+// ── Confirm ────────────────────────────────────────────────────────────
 function confirm() {
   if (!canConfirm.value) return
+
   emit('add', {
     ...props.item,
-    price:       totalPrice.value,
-    // Unique cart key per combination so same item with different options = separate line
-    cartKey:     `${props.item.id}__${JSON.stringify(selections.value)}`,
-    selections:  { ...selections.value },
-    notes:       notes.value.trim(),
-    summary:     buildSummary(),
+    price: totalPrice.value,
+    cartKey: `${props.item.id}__${JSON.stringify(selections.value)}`,
+    selections: { ...selections.value },
+    notes: notes.value.trim(),
+    summary: buildSummary(),
   })
+
   emit('close')
 }
 </script>
-
 <style scoped>
 .modal-enter-active, .modal-leave-active { transition: opacity 0.2s ease; }
 .modal-enter-from, .modal-leave-to       { opacity: 0; }
