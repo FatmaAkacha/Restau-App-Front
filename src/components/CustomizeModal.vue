@@ -83,6 +83,7 @@
                            :src="`/images/menu/${choice.image}`"
                            :alt="choice.label"
                            class="w-full h-full object-cover"
+                           :class="choice.key === 'merguez' ? 'object-contain p-1.5 scale-75' : 'object-cover'"
                            @error="e => { e.target.style.display='none'; e.target.nextElementSibling.style.display='flex' }" />
                       <div class="w-full h-full absolute inset-0 items-center justify-center text-2xl"
                            :style="choice.image ? 'display:none' : 'display:flex'">
@@ -178,7 +179,7 @@ watch(() => props.item, () => {
 function viandEmoji(key) {
   const map = {
     tandoori: '🍗', curry: '🍛', oriental: '🥙', kefta: '🥩',
-    merguez:  '🌭', steak: '🥩', escalope: '🍖', cordon: '🧀',
+    merguez:  '', steak: '🥩', escalope: '🍖', cordon: '🧀',
     tenders:  '🍗', nuggets: '🍗', falafel: '🧆',
   }
   return map[key] || '🥩'
