@@ -246,7 +246,7 @@
             </div>
 
             <!-- GOOGLE REVIEWS -->
-            <div class="relative py-6 mb-2">
+            <div id="section-reviews" class="relative py-6 mb-2" style="scroll-margin-top:96px">
               <div class="absolute inset-0 flex items-center">
                 <div
                   class="w-full h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent"
@@ -279,11 +279,13 @@
             </div>
 
             <!-- LOCATION -->
+            <div id="section-location" style="scroll-margin-top:96px">
             <RestaurantLocation
               address="22 Rue de la Défense Passive, 14000 Caen"
               phone="+33 2 59 16 04 30"
               mapUrl="https://www.google.com/maps?q=22+Rue+de+la+Défense+Passive,+14000+Caen&output=embed"
             />
+            </div>
 
           </template>
         </div>
