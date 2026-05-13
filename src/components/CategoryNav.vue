@@ -29,6 +29,28 @@
       >
         {{ cat.name }}
       </button>
+
+      <!-- Static pills for bottom sections -->
+      <button
+        @click="scrollToSection('section-reviews')"
+        class="flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-semibold
+               transition-all duration-200 border whitespace-nowrap"
+        :style="active === 'reviews'
+          ? 'background:#E8192C; color:#fff; border-color:#E8192C; box-shadow:0 2px 8px rgba(232,25,44,0.3)'
+          : 'background:#fff; color:#888; border-color:#E5E5E5'"
+      >
+        ⭐ Avis Google
+      </button>
+      <button
+        @click="scrollToSection('section-location')"
+        class="flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-semibold
+               transition-all duration-200 border whitespace-nowrap"
+        :style="active === 'location'
+          ? 'background:#E8192C; color:#fff; border-color:#E8192C; box-shadow:0 2px 8px rgba(232,25,44,0.3)'
+          : 'background:#fff; color:#888; border-color:#E5E5E5'"
+      >
+        📍 Nous trouver
+      </button>
     </div>
   </nav>
 </template>
@@ -46,6 +68,15 @@ const btnRefs = ref({})
 const OFFSET = 96
 
 // ── Click: scroll page to category ──────────────────────────────────────────
+function scrollToSection(id) {
+  const key = id === 'section-reviews' ? 'reviews' : 'location'
+  active.value = key
+  const el = document.getElementById(id)
+  if (!el) return
+  const top = el.getBoundingClientRect().top + window.scrollY - OFFSET
+  window.scrollTo({ top, behavior: 'smooth' })
+}
+
 function scrollTo(id) {
   const el = document.getElementById(`cat-${id}`)
   if (!el) return
@@ -91,8 +122,12 @@ function setupObserver() {
     (entries) => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
-          const id = parseInt(entry.target.id.replace('cat-', ''))
-          // Only update if this section is near the top
+          const rawId = entry.target.id
+          let id
+          if (rawId === 'section-reviews')  id = 'reviews'
+          else if (rawId === 'section-location') id = 'location'
+          else id = parseInt(rawId.replace('cat-', ''))
+
           if (entry.boundingClientRect.top <= OFFSET + 80) {
             active.value = id
           }
@@ -109,6 +144,12 @@ function setupObserver() {
     const el = document.getElementById(`cat-${cat.id}`)
     if (el) observer.observe(el)
   })
+
+  // Also observe the static bottom sections
+  const reviewsEl  = document.getElementById('section-reviews')
+  const locationEl = document.getElementById('section-location')
+  if (reviewsEl)  observer.observe(reviewsEl)
+  if (locationEl) observer.observe(locationEl)
 }
 
 // ── Fallback scroll listener for last categories ────────────────────────────
@@ -117,10 +158,30 @@ function onScroll() {
   const pageBottom = window.scrollY + window.innerHeight >= document.body.scrollHeight - 10
 
   if (pageBottom) {
-    const last = props.categories[props.categories.length - 1]
-    if (last && active.value !== last.id) active.value = last.id
-    return
+  const locationEl = document.getElementById('section-location')
+  const reviewsEl  = document.getElementById('section-reviews')
+
+  if (locationEl) {
+    const locationTop = locationEl.getBoundingClientRect().top + window.scrollY
+    if (locationTop <= scrollY) {
+      active.value = 'location'
+      return
+    }
   }
+
+  if (reviewsEl) {
+    const reviewsTop = reviewsEl.getBoundingClientRect().top + window.scrollY
+    if (reviewsTop <= scrollY) {
+      active.value = 'reviews'
+      return
+    }
+  }
+
+  const last = props.categories[props.categories.length - 1]
+  if (last) active.value = last.id
+
+  return
+}
 
   // Check popular section first
   const popEl = document.getElementById('cat-popular')
@@ -139,6 +200,18 @@ function onScroll() {
     if (!el) continue
     const top = el.getBoundingClientRect().top + window.scrollY
     if (top <= scrollY) current = cat.id
+  }
+
+  // Check static sections after all categories
+  const reviewsEl  = document.getElementById('section-reviews')
+  const locationEl = document.getElementById('section-location')
+  if (reviewsEl) {
+    const top = reviewsEl.getBoundingClientRect().top + window.scrollY
+    if (top <= scrollY) current = 'reviews'
+  }
+  if (locationEl) {
+    const top = locationEl.getBoundingClientRect().top + window.scrollY
+    if (top <= scrollY) current = 'location'
   }
 
   if (current !== active.value) active.value = current

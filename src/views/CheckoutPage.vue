@@ -44,15 +44,14 @@
               <input v-model="form.delivery_address" type="text" placeholder="12 Rue de la Paix, Caen" class="input" />
             </div>
             <div class="sm:col-span-2">
-              <label class="block text-xs font-medium mb-1.5" style="color:#888">Notes générales</label>
-              <textarea v-model="form.notes" rows="2" placeholder="Allergies, demandes spéciales pour toute la commande…"
-                        class="input resize-none" />
-              <!-- Item-level notes summary -->
-              <div v-if="itemNotesSummary" class="mt-2 rounded-xl px-3 py-2 text-xs"
-                   style="background:#FFF8F0; border:1px solid #FFD9A0; color:#92400E">
-                <p class="font-semibold mb-1">📝 Notes par article :</p>
-                <p class="whitespace-pre-line">{{ itemNotesSummary }}</p>
-              </div>
+              <label class="block text-xs font-medium mb-1.5" style="color:#888">
+                Notes / Allergies
+                <span v-if="itemNotesSummary" class="font-normal" style="color:#AAA"> — pré-rempli, modifiable</span>
+              </label>
+              <textarea v-model="form.notes" rows="3"
+                        placeholder="Ex : sans oignons, allergie aux noix…"
+                        class="input resize-none"
+                        @input="_userEditedNotes = true" />
             </div>
           </div>
 
@@ -181,139 +180,264 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted, nextTick, watch } from 'vue'
-import { useRouter }         from 'vue-router'
-import { useCartStore }      from '@/stores/cartStore'
-import { useRestaurantStore } from '@/stores/restaurantStore'
-import orderService          from '@/services/orderService'
-import paymentService        from '@/services/paymentService'
+import {
+  ref,
+  computed,
+  onMounted,
+  onUnmounted,
+  nextTick,
+  watch,
+  watchEffect
+} from 'vue'
 
-const cart       = useCartStore()
-const restStore  = useRestaurantStore()
-const router     = useRouter()
+import { useRouter } from 'vue-router'
+import { useCartStore } from '@/stores/cartStore'
+import { useRestaurantStore } from '@/stores/restaurantStore'
+
+import orderService from '@/services/orderService'
+import paymentService from '@/services/paymentService'
+
+const cart = useCartStore()
+const restStore = useRestaurantStore()
+const router = useRouter()
 
 const form = ref({
-  customer_name: '', customer_phone: '', customer_email: '',
-  delivery_address: '', notes: '', type: 'delivery',
+  customer_name: '',
+  customer_phone: '',
+  customer_email: '',
+  delivery_address: '',
+  notes: '',
+  type: 'delivery',
 })
-const paymentMethod = ref('card')
-const loading       = ref(false)
-const error         = ref('')
-const stripeError   = ref('')
 
-let stripe = null, cardElement = null
+const paymentMethod = ref('card')
+const loading = ref(false)
+const error = ref('')
+const stripeError = ref('')
+
+let stripe = null
+let cardElement = null
+
+const MIN_ORDER = 20
+
+/* ─────────────────────────────
+   NOTES FUSION
+───────────────────────────── */
+
+// Notes des produits
+const itemNotesSummary = computed(() => {
+  return cart.items
+    .filter(i => i.notes && i.notes.trim())
+    .map(i => `• ${i.name} : ${i.notes.trim()}`)
+    .join('\n')
+})
+
+// Notes checkout
+const checkoutNotes = computed(() => {
+  return cart.checkoutNotes || ''
+})
+
+// Fusion globale
+const mergedNotes = computed(() => {
+  const notes = []
+
+  if (checkoutNotes.value.trim()) {
+    notes.push('📝 Notes générales :')
+    notes.push(checkoutNotes.value.trim())
+  }
+
+  if (itemNotesSummary.value.trim()) {
+    notes.push('')
+    notes.push('🍔 Notes produits :')
+    notes.push(itemNotesSummary.value.trim())
+  }
+
+  return notes.join('\n')
+})
+
+// Autofill intelligent
+let _userEditedNotes = false
+
+const _stopAutoFill = watchEffect(() => {
+  if (!_userEditedNotes) {
+    form.value.notes = mergedNotes.value
+  }
+})
+
+/* ─────────────────────────────
+   TOTAL
+───────────────────────────── */
 
 const deliveryFee = computed(() => {
   if (form.value.type === 'pickup') return 0
   if (cart.subtotal < MIN_ORDER) return 0
   return 2.50
 })
-const total       = computed(() => cart.subtotal + deliveryFee.value)
-const MIN_ORDER   = 20
 
-// True when subtotal is below the delivery minimum
-const belowMinOrder = computed(() => cart.subtotal < MIN_ORDER)
-
-// Compile all item-level notes/allergies from customized items into a readable summary
-const itemNotesSummary = computed(() => {
-  const lines = cart.items
-    .filter(i => i.notes && i.notes.trim())
-    .map(i => `• ${i.name} : ${i.notes.trim()}`)
-  return lines.join('\n')
+const total = computed(() => {
+  return cart.subtotal + deliveryFee.value
 })
 
-// Clicking "Livraison" when below minimum does nothing
+const belowMinOrder = computed(() => {
+  return cart.subtotal < MIN_ORDER
+})
+
 function selectDelivery() {
-  if (!belowMinOrder.value) form.value.type = 'delivery'
+  if (!belowMinOrder.value) {
+    form.value.type = 'delivery'
+  }
 }
 
-// Auto-switch to pickup if items are removed and subtotal drops below minimum
 watch(() => cart.subtotal, (val) => {
   if (val < MIN_ORDER && form.value.type === 'delivery') {
     form.value.type = 'pickup'
   }
 })
 
+/* ─────────────────────────────
+   STRIPE
+───────────────────────────── */
+
 async function mountCard() {
   if (!stripe) return
-  // Destroy existing element before remounting
-  if (cardElement) { cardElement.destroy(); cardElement = null }
+
+  if (cardElement) {
+    cardElement.destroy()
+    cardElement = null
+  }
+
   await nextTick()
-  const el = document.getElementById('card-element')
-  if (!el) return
+
   const elements = stripe.elements()
+
   cardElement = elements.create('card', {
     style: {
-      base: { fontSize: '15px', color: '#1A1A1A', '::placeholder': { color: '#AAAAAA' }, iconColor: '#E8192C' },
-      invalid: { color: '#E8192C' }
+      base: {
+        fontSize: '15px',
+        color: '#1A1A1A',
+        '::placeholder': {
+          color: '#AAAAAA'
+        }
+      }
     }
   })
+
   cardElement.mount('#card-element')
-  cardElement.on('change', e => { stripeError.value = e.error?.message || '' })
+
+  cardElement.on('change', e => {
+    stripeError.value = e.error?.message || ''
+  })
 }
 
-// Remount Stripe card element whenever switching back to 'card'
 watch(paymentMethod, async (val) => {
-  if (val === 'card') await mountCard()
+  if (val === 'card') {
+    await mountCard()
+  }
 })
 
 onMounted(async () => {
-  if (!restStore.restaurant) await restStore.fetchMenu()
+  if (!restStore.restaurant) {
+    await restStore.fetchMenu()
+  }
+
   stripe = await paymentService.getStripe()
-  if (stripe) await mountCard()
+
+  if (stripe) {
+    await mountCard()
+  }
 })
-onUnmounted(() => cardElement?.destroy())
+
+onUnmounted(() => {
+  cardElement?.destroy()
+  _stopAutoFill()
+})
+
+/* ─────────────────────────────
+   PLACE ORDER
+───────────────────────────── */
 
 async function placeOrder() {
-  error.value = ''
-  if (!form.value.customer_name || !form.value.customer_phone || !form.value.delivery_address) {
-    error.value = 'Veuillez remplir tous les champs obligatoires.'
-    return
-  }
-  if (form.value.type === 'delivery' && cart.subtotal < MIN_ORDER) {
-    error.value = `Commande minimum de €${MIN_ORDER} pour la livraison.`
-    return
-  }
 
-  // Always use the fresh restaurant ID from the store, not the stale cart one
-  const restaurantId = restStore.restaurant?.id || cart.restaurantId
-  if (!restaurantId) {
-    error.value = 'Restaurant introuvable. Veuillez recharger la page.'
+  error.value = ''
+
+  if (
+    !form.value.customer_name ||
+    !form.value.customer_phone ||
+    !form.value.delivery_address
+  ) {
+    error.value = 'Veuillez remplir tous les champs obligatoires.'
     return
   }
 
   loading.value = true
+
   try {
-    const { data: order } = await orderService.create({
+
+    const restaurantId =
+      restStore.restaurant?.id ||
+      cart.restaurantId
+
+    const payload = {
+
       restaurant_id: restaurantId,
+
       ...form.value,
-      // Merge order-level notes with item-level notes summary for the admin
-      notes: [
-        form.value.notes,
-        itemNotesSummary.value
-      ].filter(Boolean).join('\n\n') || null,
+
+      // IMPORTANT
+      notes: mergedNotes.value || form.value.notes,
+
       items: cart.items.map(i => ({
-        menu_item_id:          i.id,
-        quantity:              i.quantity,
-        unit_price:            i.price,
-        notes:                 i.notes || null,
-        customization:         i.selections || null,
-        customization_summary: i.summary   || null,
+        menu_item_id: i.id,
+        quantity: i.quantity,
+        unit_price: i.price,
+
+        // IMPORTANT
+        notes: i.notes?.trim() || null,
+
+        customization: i.selections || null,
+
+        customization_summary:
+          i.summary || null,
       }))
-    })
-    if (paymentMethod.value === 'card') {
-      const { data: intent } = await paymentService.createIntent(order.id)
-      const { error: stripeErr } = await paymentService.confirmPayment(
-        intent.client_secret, cardElement,
-        { name: form.value.customer_name, email: form.value.customer_email }
-      )
-      if (stripeErr) { error.value = stripeErr.message; loading.value = false; return }
     }
+
+    const { data: order } =
+      await orderService.create(payload)
+
+    if (paymentMethod.value === 'card') {
+
+      const { data: intent } =
+        await paymentService.createIntent(order.id)
+
+      const { error: stripeErr } =
+        await paymentService.confirmPayment(
+          intent.client_secret,
+          cardElement,
+          {
+            name: form.value.customer_name,
+            email: form.value.customer_email
+          }
+        )
+
+      if (stripeErr) {
+        error.value = stripeErr.message
+        loading.value = false
+        return
+      }
+    }
+
     cart.clearCart()
+
     router.push(`/order/${order.id}`)
+
   } catch (e) {
-    error.value = e.response?.data?.message || 'Une erreur est survenue. Veuillez réessayer.'
+
+    error.value =
+      e.response?.data?.message ||
+      'Une erreur est survenue.'
+
   } finally {
+
     loading.value = false
   }
 }

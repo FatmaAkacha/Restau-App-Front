@@ -62,22 +62,72 @@
         </div>
 
         <!-- Items -->
-        <div class="text-left mb-5">
-          <h3 class="font-semibold text-sm mb-2" style="color:#1A1A1A">Vos articles</h3>
-          <div v-for="item in order.items" :key="item.id"
-               class="py-2 border-b last:border-0"
-               style="border-color:#F0F0F0">
-            <div class="flex justify-between text-sm">
-              <span style="color:#555">{{ item.quantity }}× {{ item.name }}</span>
-              <span class="font-medium" style="color:#1A1A1A">€{{ (item.price * item.quantity).toFixed(2) }}</span>
-            </div>
-            <p v-if="item.customization_summary" class="text-xs mt-0.5 pl-4" style="color:#888">
-              {{ item.customization_summary }}
-            </p>
-            <p v-if="item.notes" class="text-xs mt-0.5 pl-4 italic" style="color:#AAA">
-              📝 {{ item.notes }}
-            </p>
-          </div>
+<!-- Items -->
+<div class="text-left mb-5">
+
+  <h3
+    class="font-semibold text-sm mb-2"
+    style="color:#1A1A1A"
+  >
+    Vos articles
+  </h3>
+
+  <div
+    v-for="item in order.items"
+    :key="item.id"
+    class="py-3 border-b last:border-0"
+    style="border-color:#F0F0F0"
+  >
+
+    <div class="flex justify-between gap-3">
+
+      <div class="flex-1 min-w-0">
+
+        <p
+          class="text-sm font-medium"
+          style="color:#1A1A1A"
+        >
+          {{ item.quantity }}× {{ item.name }}
+        </p>
+
+        <!-- CUSTOMIZATION -->
+        <p
+          v-if="item.customization_summary"
+          class="text-xs mt-1"
+          style="color:#E8192C"
+        >
+          {{ item.customization_summary }}
+        </p>
+
+        <!-- ITEM NOTES -->
+        <div
+          v-if="item.notes"
+          class="mt-2 rounded-xl px-3 py-2 text-xs"
+          style="background:#FAFAFA; color:#666; border:1px solid #EFEFEF"
+        >
+          📝 {{ item.notes }}
+        </div>
+
+      </div>
+
+      <div
+        class="text-sm font-bold flex-shrink-0"
+        style="color:#1A1A1A"
+      >
+        €{{ (item.price * item.quantity).toFixed(2) }}
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+        <!-- Order-level notes -->
+        <div v-if="order.notes" class="text-left mb-5 rounded-2xl p-4 border"
+             style="background:#FFF8F0; border-color:#FFD9A0">
+          <p class="text-xs font-semibold mb-1" style="color:#92400E">📝 Notes / Allergies</p>
+          <p class="text-sm whitespace-pre-line" style="color:#555">{{ order.notes }}</p>
         </div>
 
         <router-link to="/">
