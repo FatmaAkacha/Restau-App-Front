@@ -29,6 +29,12 @@
                 :style="store.isOpen ? 'background:#fff' : 'background:#888'" />
           {{ store.isOpen ? 'En ligne' : 'Hors ligne' }}
         </button>
+        <!-- Products link -->
+        <router-link to="/admin/produits"
+                     class="flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-semibold transition-all"
+                     style="background:#FFF0F1; color:#E8192C">
+          🛒 Produits
+        </router-link>
         <!-- Logout -->
         <button @click="handleLogout"
                 class="flex items-center gap-1.5 px-3 py-2 rounded-full text-sm font-semibold transition-all"
@@ -41,20 +47,7 @@
 
     <div class="max-w-7xl mx-auto px-4 py-6 space-y-6">
 
-      <!-- ── TABS ── -->
-      <div class="flex gap-2 border-b" style="border-color:#E5E5E5">
-        <button v-for="tab in tabs" :key="tab.key"
-                @click="activeTab = tab.key"
-                class="px-5 py-2.5 text-sm font-semibold border-b-2 transition-all -mb-px"
-                :style="activeTab === tab.key
-                  ? 'border-color:#E8192C; color:#E8192C'
-                  : 'border-color:transparent; color:#888'">
-          {{ tab.label }}
-        </button>
-      </div>
-
-      <!-- ── TAB: COMMANDES ── -->
-      <template v-if="activeTab === 'orders'">
+      <!-- ── STATS ── -->
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
         <StatCard icon-img="/images/icons/enattente.png" label="En attente"      :value="store.stats.pending"           color="yellow" />
         <StatCard icon-img="/images/icons/encuisine.png" label="En cuisine"      :value="store.stats.preparing"         color="blue"   />
@@ -227,13 +220,6 @@
         </div>
       </div>
 
-      </template><!-- end orders tab -->
-
-      <!-- ── TAB: PRODUITS ── -->
-      <template v-if="activeTab === 'products'">
-        <ProductManager />
-      </template>
-
     </div>
   </div>
 </template>
@@ -248,19 +234,11 @@ import OrderAlert         from '@/components/admin/OrderAlert.vue'
 import ActiveOrderCard    from '@/components/admin/ActiveOrderCard.vue'
 import StatusBadge        from '@/components/StatusBadge.vue'
 import PaymentBadge       from '@/components/admin/PaymentBadge.vue'
-import ProductManager     from '@/components/admin/ProductManager.vue'
 
 const store  = useAdminStore()
 const auth   = useAuthStore()
 const router = useRouter()
 const filter = ref('')
-
-// ── Tabs ──────────────────────────────────────────────────────────────
-const activeTab = ref('orders')
-const tabs = [
-  { key: 'orders',   label: '📋 Commandes' },
-  { key: 'products', label: '🛒 Produits'  },
-]
 
 const statuses = [
   { value: 'pending',    label: 'En attente'   },

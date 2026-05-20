@@ -3,6 +3,8 @@
     <!-- Card -->
     <div class="card flex gap-3 p-3 cursor-pointer group transition-all duration-200
                 hover:shadow-md hover:border-red-200"
+         :class="!item.is_available ? 'opacity-60' : ''"
+         :style="!item.is_available ? 'background:#F5F5F5' : ''"
          @click="handleClick">
 
       <!-- Text -->
@@ -22,6 +24,11 @@
                 style="background:#FFF0F1; color:#E8192C; border:1px solid #FFCDD0">
             🔥 Populaire
           </span>
+          <span v-if="!item.is_available"
+                class="text-xs font-semibold px-2 py-0.5 rounded-full"
+                style="background:#F0F0F0; color:#888; border:1px solid #E5E5E5">
+            ⚠️ Rupture de stock
+          </span>
           <span v-if="item.customization_options?.length"
                 class="text-xs px-2 py-0.5 rounded-full"
                 style="background:#F0F7FF; color:#2563EB; border:1px solid #BFDBFE">
@@ -37,12 +44,14 @@
              :src="getImageUrl(item.image)"
              :alt="item.name"
              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+             :class="!item.is_available ? 'grayscale' : ''"
              @error="e => e.target.style.display='none'" />
         <div class="w-full h-full flex items-center justify-center text-3xl absolute inset-0"
              :class="item.image ? 'z-[-1]' : ''">
           {{ emoji }}
         </div>
         <button
+          v-if="item.is_available"
           class="absolute bottom-1.5 right-1.5 w-7 h-7 rounded-full text-white
                  flex items-center justify-center text-base font-bold
                  opacity-0 group-hover:opacity-100 scale-75 group-hover:scale-100
@@ -71,6 +80,8 @@ const emit  = defineEmits(['add'])
 const modalItem = ref(null)
 
 function handleClick() {
+  if (!props.item.is_available) return
+  
   if (props.item?.customization_options?.length) {
     modalItem.value = props.item
   } else {

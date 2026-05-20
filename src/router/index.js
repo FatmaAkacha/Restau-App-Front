@@ -4,6 +4,7 @@ import RestaurantPage  from '@/views/RestaurantPage.vue'
 import CheckoutPage    from '@/views/CheckoutPage.vue'
 import OrderSuccess    from '@/views/OrderSuccess.vue'
 import AdminDashboard  from '@/views/AdminDashboard.vue'
+import AdminProducts   from '@/views/AdminProducts.vue'
 import AdminLogin      from '@/views/AdminLogin.vue'
 
 const router = createRouter({
@@ -21,10 +22,17 @@ const router = createRouter({
       meta: { guestOnly: true },
     },
 
-    // Admin dashboard — requires authentication
+    // Admin dashboard — orders only
     {
       path: '/admin',
       component: AdminDashboard,
+      meta: { requiresAuth: true },
+    },
+
+    // Admin products management
+    {
+      path: '/admin/produits',
+      component: AdminProducts,
       meta: { requiresAuth: true },
     },
   ],
