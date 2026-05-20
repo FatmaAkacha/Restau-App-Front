@@ -12,16 +12,16 @@
       NOUVEAU
     </div>
 
-    <div class="bg-white rounded-2xl p-5 space-y-4">
+    <div class="bg-white rounded-2xl p-3 md:p-5 space-y-3 md:space-y-4">
 
       <!-- En-tête -->
-      <div class="flex items-start justify-between">
+      <div class="flex flex-col sm:flex-row items-start sm:items-start justify-between gap-2">
         <div>
-          <p class="font-bold text-base" style="color:#1A1A1A">{{ order.customer_name }}</p>
+          <p class="font-bold text-sm md:text-base" style="color:#1A1A1A">{{ order.customer_name }}</p>
           <p class="text-xs mt-0.5" style="color:#888">📞 {{ order.customer_phone }}</p>
         </div>
         <div class="text-right">
-          <p class="font-bold text-lg" style="color:#E8192C">€{{ Number(order.total).toFixed(2) }}</p>
+          <p class="font-bold text-base md:text-lg" style="color:#E8192C">€{{ Number(order.total).toFixed(2) }}</p>
           <p class="text-xs" style="color:#888">N° {{ String(order.id).padStart(3, '0') }}</p>
         </div>
       </div>
@@ -43,14 +43,14 @@
       </div>
 
       <!-- Adresse -->
-      <div v-if="order.type === 'delivery'" class="text-sm flex gap-2" style="color:#555">
+      <div v-if="order.type === 'delivery'" class="text-xs md:text-sm flex gap-2" style="color:#555">
         <span class="flex-shrink-0">📍</span>
         <span>{{ order.delivery_address }}</span>
       </div>
 
       <!-- Articles -->
-      <div class="rounded-xl p-3 space-y-1.5" style="background:#F7F7F7">
-        <div v-for="item in order.items" :key="item.id" class="text-sm">
+      <div class="rounded-xl p-2 md:p-3 space-y-1.5" style="background:#F7F7F7">
+        <div v-for="item in order.items" :key="item.id" class="text-xs md:text-sm">
           <div class="flex justify-between">
             <span style="color:#555">{{ item.quantity }}× {{ item.name }}</span>
             <span class="font-semibold" style="color:#1A1A1A">€{{ (item.price * item.quantity).toFixed(2) }}</span>
@@ -68,13 +68,13 @@
       <p v-if="order.notes" class="text-xs italic" style="color:#888">📝 {{ order.notes }}</p>
 
       <!-- Temps de préparation -->
-      <div class="space-y-3 pt-1">
+      <div class="space-y-2 md:space-y-3 pt-1">
         <div>
           <label class="text-xs font-medium block mb-1.5" style="color:#888">Temps de préparation</label>
-          <div class="flex gap-1.5">
+          <div class="flex gap-1 md:gap-1.5 flex-wrap">
             <button v-for="t in [10,15,20,25,30,45]" :key="t"
                     @click="prepTime = t"
-                    class="flex-1 py-1.5 rounded-lg text-xs font-semibold border transition-all"
+                    class="flex-1 min-w-12 py-1.5 rounded-lg text-xs font-semibold border transition-all"
                     :style="prepTime === t
                       ? 'background:#E8192C; color:#fff; border-color:#E8192C'
                       : 'background:#fff; color:#555; border-color:#E5E5E5'">
@@ -86,14 +86,14 @@
         <!-- Actions -->
         <div class="flex gap-2">
           <button @click="$emit('accept', prepTime)"
-                  class="flex-1 text-white font-semibold py-2.5 rounded-xl text-sm transition-all"
+                  class="flex-1 text-white font-semibold py-2 md:py-2.5 rounded-xl text-xs md:text-sm transition-all"
                   style="background:#16a34a"
                   onmouseover="this.style.background='#15803d'"
                   onmouseout="this.style.background='#16a34a'">
             ✓ Accepter
           </button>
           <button @click="showReject = !showReject"
-                  class="flex-1 font-semibold py-2.5 rounded-xl text-sm border transition-all"
+                  class="flex-1 font-semibold py-2 md:py-2.5 rounded-xl text-xs md:text-sm border transition-all"
                   style="background:#FFF0F1; color:#E8192C; border-color:#FFCDD0">
             ✕ Refuser
           </button>
@@ -102,12 +102,12 @@
         <!-- Motif refus -->
         <div v-if="showReject" class="space-y-2">
           <input v-model="rejectReason" type="text" placeholder="Motif (optionnel)"
-                 class="w-full rounded-xl px-3 py-2 text-sm border focus:outline-none"
+                 class="w-full rounded-xl px-3 py-2 text-xs md:text-sm border focus:outline-none"
                  style="border-color:#E5E5E5; color:#1A1A1A"
                  onfocus="this.style.borderColor='#E8192C'"
                  onblur="this.style.borderColor='#E5E5E5'" />
           <button @click="$emit('reject', rejectReason)"
-                  class="w-full text-white font-semibold py-2 rounded-xl text-sm transition-all"
+                  class="w-full text-white font-semibold py-2 rounded-xl text-xs md:text-sm transition-all"
                   style="background:#E8192C">
             Confirmer le refus
           </button>

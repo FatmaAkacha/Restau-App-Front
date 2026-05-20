@@ -5,6 +5,7 @@ import CheckoutPage    from '@/views/CheckoutPage.vue'
 import OrderSuccess    from '@/views/OrderSuccess.vue'
 import AdminDashboard  from '@/views/AdminDashboard.vue'
 import AdminProducts   from '@/views/AdminProducts.vue'
+import AdminUsers      from '@/views/AdminUsers.vue'
 import AdminLogin      from '@/views/AdminLogin.vue'
 
 const router = createRouter({
@@ -33,6 +34,13 @@ const router = createRouter({
     {
       path: '/admin/produits',
       component: AdminProducts,
+      meta: { requiresAuth: true },
+    },
+
+    // Admin users management
+    {
+      path: '/admin/utilisateurs',
+      component: AdminUsers,
       meta: { requiresAuth: true },
     },
   ],

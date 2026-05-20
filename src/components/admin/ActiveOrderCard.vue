@@ -1,10 +1,10 @@
 <template>
-  <div class="card p-4 space-y-3">
+  <div class="card p-3 md:p-4 space-y-2 md:space-y-3">
 
     <!-- Header -->
-    <div class="flex items-center justify-between">
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
       <div>
-        <p class="font-semibold" style="color:#1A1A1A">{{ order.customer_name }}</p>
+        <p class="font-semibold text-sm md:text-base" style="color:#1A1A1A">{{ order.customer_name }}</p>
         <p class="text-xs mt-0.5" style="color:#888">
           {{ order.type === 'delivery' ? '🚚 ' + order.delivery_address : 'À emporter' }}
         </p>
@@ -27,7 +27,7 @@
 
     <!-- ── COUNTDOWN TIMER (shown when preparing) ── -->
     <div v-if="order.status === 'preparing' && order.prep_time"
-         class="rounded-xl p-3 text-center"
+         class="rounded-xl p-2 md:p-3 text-center"
          :style="timerStyle">
 
       <p class="text-xs font-semibold uppercase tracking-wide mb-1" :style="timerLabelStyle">
@@ -35,7 +35,7 @@
       </p>
 
       <!-- Big countdown display -->
-      <div class="text-3xl font-black tabular-nums" :style="timerValueStyle">
+      <div class="text-2xl md:text-3xl font-black tabular-nums" :style="timerValueStyle">
         {{ displayTime }}
       </div>
 
@@ -52,7 +52,7 @@
 
     <!-- Static prep time (when not yet preparing) -->
     <div v-else-if="order.prep_time && order.status !== 'preparing'"
-         class="flex items-center gap-2 text-sm rounded-lg px-3 py-2"
+         class="flex items-center gap-2 text-xs md:text-sm rounded-lg px-3 py-2"
          style="background:#FFF8F0; color:#D97706">
       <span>⏱</span>
       <span class="font-semibold">{{ order.prep_time }} min de préparation</span>
@@ -62,7 +62,7 @@
     <div class="flex gap-2 flex-wrap">
       <button v-for="next in nextStatuses" :key="next.value"
               @click="$emit('status', next.value)"
-              class="flex-1 text-xs font-semibold py-2 rounded-xl border transition-all"
+              class="flex-1 min-w-24 text-xs font-semibold py-2 rounded-xl border transition-all"
               style="border-color:#E5E5E5; color:#555"
               onmouseover="this.style.background='#E8192C'; this.style.color='#fff'; this.style.borderColor='#E8192C'"
               onmouseout="this.style.background=''; this.style.color='#555'; this.style.borderColor='#E5E5E5'">

@@ -3,7 +3,7 @@
 
     <!-- ── TOP BAR ── -->
     <div class="flex flex-wrap items-center justify-between gap-3">
-      <h2 class="font-bold text-lg" style="color:#1A1A1A">🛒 Gestion des produits</h2>
+      <h2 class="font-bold text-lg" style="color:#1A1A1A">Gestion des produits</h2>
       <div class="flex gap-2">
         <button @click="openAddCategory()"
                 class="px-4 py-2 rounded-xl text-sm font-semibold border transition-all"
