@@ -34,7 +34,11 @@
         </div>
         <div>
           <h1 class="font-bold text-sm leading-none text-white">GOODNAAN</h1>
-          <p class="text-xs mt-1" style="color:#888">Admin</p>
+          <div class="flex items-center gap-2 mt-1">
+            <p class="text-xs" style="color:#888">{{ auth.user?.username || 'Admin' }}</p>
+            <span v-if="auth.user?.role === 'admin'" class="text-xs font-semibold px-2 py-0.5 rounded-full" style="background:#E8192C; color:#fff">👑 Admin</span>
+            <span v-else-if="auth.user?.role === 'staff'" class="text-xs font-semibold px-2 py-0.5 rounded-full" style="background:#2563EB; color:#fff">👤 Staff</span>
+          </div>
         </div>
       </div>
 
@@ -64,18 +68,21 @@
       <!-- Navigation -->
       <nav class="flex-1 px-3 py-4 space-y-2 overflow-y-auto">
 
+        <!-- Commandes (visible to all) -->
         <router-link
-          to="/admin"
+          :to="auth.user?.role === 'staff' ? '/commandes' : '/admin'"
           @click="mobileMenuOpen = false"
           class="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all"
-          :class="isActive('/admin') ? 'text-white' : 'text-gray-400 hover:text-white'"
-          :style="isActive('/admin') ? 'background:linear-gradient(135deg,#E8192C,#A50E1C)' : ''"
+          :class="isCommandesActive() ? 'text-white' : 'text-gray-400 hover:text-white'"
+          :style="isCommandesActive() ? 'background:linear-gradient(135deg,#E8192C,#A50E1C)' : ''"
         >
           <span class="text-lg">📋</span>
           <span>Commandes</span>
         </router-link>
 
+        <!-- Produits (admin only) -->
         <router-link
+          v-if="auth.user?.role === 'admin'"
           to="/admin/produits"
           @click="mobileMenuOpen = false"
           class="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all"
@@ -86,7 +93,9 @@
           <span>Produits</span>
         </router-link>
 
+        <!-- Utilisateurs (admin only) -->
         <router-link
+          v-if="auth.user?.role === 'admin'"
           to="/admin/utilisateurs"
           @click="mobileMenuOpen = false"
           class="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all"
@@ -216,6 +225,10 @@ const statusText = computed(() => {
 
 function isActive(path) {
   return route.path === path
+}
+
+function isCommandesActive() {
+  return route.path === '/admin' || route.path === '/commandes'
 }
 
 function scrollToCategories() {

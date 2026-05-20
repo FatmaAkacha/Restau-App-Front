@@ -58,7 +58,7 @@
                   <th class="px-4 py-2 text-left text-xs font-semibold uppercase" style="color:#888">Produit</th>
                   <th class="px-4 py-2 text-left text-xs font-semibold uppercase" style="color:#888">Prix</th>
                   <th class="px-4 py-2 text-left text-xs font-semibold uppercase" style="color:#888">Stock</th>
-                  <th class="px-4 py-2 text-left text-xs font-semibold uppercase" style="color:#888">🔥</th>
+                  <th class="px-4 py-2 text-left text-xs font-semibold uppercase" style="color:#888">Populaire</th>
                   <th class="px-4 py-2 text-right text-xs font-semibold uppercase" style="color:#888">Actions</th>
                 </tr>
               </thead>
@@ -82,7 +82,6 @@
                       </div>
                       <span class="font-medium" style="color:#1A1A1A">{{ item.name }}</span>
                      
-                      <p class="text-xs">{{ item.image }}</p>
 
                     </div>
                   </td>

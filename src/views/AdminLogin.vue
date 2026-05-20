@@ -9,7 +9,6 @@
         <div class="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-4 shadow-lg"
              style="background:linear-gradient(135deg,#E8192C,#A50E1C)">🍽️</div>
         <h1 class="text-2xl font-extrabold text-white">GOODNAAN</h1>
-        <p class="text-sm mt-1" style="color:#AAA">Espace administration</p>
       </div>
 
       <!-- Card -->
@@ -26,7 +25,7 @@
             <input
               v-model="form.login"
               type="text"
-              placeholder="admin@goodnaan.fr"
+              placeholder="exemple@gmail.com"
               autocomplete="username"
               class="w-full rounded-xl px-4 py-3 text-sm transition-all outline-none"
               style="border:1.5px solid #E5E5E5; color:#1A1A1A"
@@ -57,7 +56,7 @@
                       @click="showPwd = !showPwd"
                       class="absolute right-3 top-1/2 -translate-y-1/2 text-sm"
                       style="color:#AAA">
-                {{ showPwd ? '🙈' : '👁️' }}
+                    {{ showPwd ? '🔓' : '🔒' }}
               </button>
             </div>
           </div>
@@ -118,7 +117,9 @@ async function submit() {
   loading.value = true
   try {
     await auth.login(form.value.login, form.value.password)
-    router.push('/admin')
+    // Redirect based on user role
+    const redirectPath = auth.user?.role === 'staff' ? '/commandes' : '/admin'
+    router.push(redirectPath)
   } catch (e) {
     error.value = e.response?.data?.message || 'Erreur de connexion.'
   } finally {

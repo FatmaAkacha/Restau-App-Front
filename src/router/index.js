@@ -4,9 +4,11 @@ import RestaurantPage  from '@/views/RestaurantPage.vue'
 import CheckoutPage    from '@/views/CheckoutPage.vue'
 import OrderSuccess    from '@/views/OrderSuccess.vue'
 import AdminDashboard  from '@/views/AdminDashboard.vue'
+import StaffDashboard  from '@/views/StaffDashboard.vue'
 import AdminProducts   from '@/views/AdminProducts.vue'
 import AdminUsers      from '@/views/AdminUsers.vue'
 import AdminLogin      from '@/views/AdminLogin.vue'
+import { useAuthStore } from '@/stores/authStore'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -23,25 +25,35 @@ const router = createRouter({
       meta: { guestOnly: true },
     },
 
-    // Admin dashboard — orders only
+    // Admin dashboard — orders only (accessible to admin and staff)
     {
       path: '/admin',
-      component: AdminDashboard,
+      component: () => {
+        const auth = useAuthStore()
+        return auth.user?.role === 'admin' ? AdminDashboard : StaffDashboard
+      },
       meta: { requiresAuth: true },
     },
 
-    // Admin products management
+    // Staff dashboard — alternative route for staff
+    {
+      path: '/commandes',
+      component: StaffDashboard,
+      meta: { requiresAuth: true },
+    },
+
+    // Admin products management (admin only)
     {
       path: '/admin/produits',
       component: AdminProducts,
-      meta: { requiresAuth: true },
+      meta: { requiresAuth: true, requiresAdmin: true },
     },
 
-    // Admin users management
+    // Admin users management (admin only)
     {
       path: '/admin/utilisateurs',
       component: AdminUsers,
-      meta: { requiresAuth: true },
+      meta: { requiresAuth: true, requiresAdmin: true },
     },
   ],
   scrollBehavior: () => ({ top: 0 })
@@ -50,6 +62,7 @@ const router = createRouter({
 // Navigation guard
 router.beforeEach((to, _from, next) => {
   const token = localStorage.getItem('admin_token')
+  const auth = useAuthStore()
 
   if (to.meta.requiresAuth && !token) {
     // Not logged in → redirect to login
@@ -57,8 +70,15 @@ router.beforeEach((to, _from, next) => {
   }
 
   if (to.meta.guestOnly && token) {
-    // Already logged in → redirect to dashboard
-    return next('/admin')
+    // Already logged in → redirect to appropriate dashboard
+    const redirectPath = auth.user?.role === 'staff' ? '/commandes' : '/admin'
+    return next(redirectPath)
+  }
+
+  // Check if route requires admin role
+  if (to.meta.requiresAdmin && auth.user?.role !== 'admin') {
+    // Staff user trying to access admin-only page → redirect to staff dashboard
+    return next('/commandes')
   }
 
   next()
