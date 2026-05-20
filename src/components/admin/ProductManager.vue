@@ -72,7 +72,7 @@
                       <div class="w-8 h-8 rounded-lg overflow-hidden flex-shrink-0"
                            style="background:#F0F0F0">
                         <img v-if="item.image"
-                             :src="`/images/menu/${item.image}`"
+                             :src="getImageUrl(item.image)"
                              :alt="item.name"
                              class="w-full h-full object-cover"
                              @error="e => e.target.style.display='none'" />
@@ -156,6 +156,7 @@
             </div>
 
             <div class="px-6 py-5 space-y-4">
+              <!-- Catégorie -->
               <div>
                 <label class="block text-xs font-semibold mb-1.5" style="color:#555">Catégorie *</label>
                 <select v-model="itemForm.category_id" class="input">
@@ -163,25 +164,88 @@
                   <option v-for="cat in categories" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
                 </select>
               </div>
+
+              <!-- Nom -->
               <div>
                 <label class="block text-xs font-semibold mb-1.5" style="color:#555">Nom *</label>
                 <input v-model="itemForm.name" type="text" placeholder="Ex : Cheese Naan Kefta" class="input" />
               </div>
+
+              <!-- Description -->
               <div>
                 <label class="block text-xs font-semibold mb-1.5" style="color:#555">Description</label>
                 <textarea v-model="itemForm.description" rows="2" class="input resize-none"
                           placeholder="Description courte…" />
               </div>
-              <div class="grid grid-cols-2 gap-4">
-                <div>
-                  <label class="block text-xs font-semibold mb-1.5" style="color:#555">Prix (€) *</label>
-                  <input v-model="itemForm.price" type="number" step="0.01" min="0" class="input" />
-                </div>
-                <div>
-                  <label class="block text-xs font-semibold mb-1.5" style="color:#555">Image (fichier)</label>
-                  <input v-model="itemForm.image" type="text" placeholder="ex: burger.png" class="input" />
-                </div>
+
+              <!-- Prix -->
+              <div>
+                <label class="block text-xs font-semibold mb-1.5" style="color:#555">Prix (€) *</label>
+                <input v-model="itemForm.price" type="number" step="0.01" min="0" class="input" />
               </div>
+
+              <!-- ── IMAGE UPLOAD ── -->
+              <div>
+                <label class="block text-xs font-semibold mb-1.5" style="color:#555">Image du produit</label>
+
+                <!-- Zone drag & drop / clic -->
+                <label
+                  class="relative flex flex-col items-center justify-center rounded-xl border-2 border-dashed cursor-pointer transition-all overflow-hidden"
+                  :style="imagePreview
+                    ? 'border-color:#E8192C; background:#FFF8F8; min-height:140px'
+                    : 'border-color:#E5E5E5; background:#FAFAFA; min-height:120px'"
+                  @dragover.prevent="dragOver = true"
+                  @dragleave.prevent="dragOver = false"
+                  @drop.prevent="onDrop"
+                  :class="{ 'ring-2 ring-red-300': dragOver }">
+
+                  <!-- Aperçu de l'image -->
+                  <img
+                    v-if="imagePreview"
+                    :src="imagePreview"
+                    alt="Aperçu"
+                    class="w-full object-cover rounded-xl"
+                    style="max-height:180px" />
+
+                  <!-- Placeholder (pas d'image) -->
+                  <div v-else class="flex flex-col items-center gap-1.5 py-6 px-4 text-center">
+                    <span class="text-3xl">🖼️</span>
+                    <span class="text-xs font-semibold" style="color:#555">
+                      Glisser une image ici ou <span style="color:#E8192C">parcourir</span>
+                    </span>
+                    <span class="text-xs" style="color:#BBB">PNG, JPG, WEBP — max 2 Mo</span>
+                  </div>
+
+                  <!-- Overlay hover si image déjà présente -->
+                  <div v-if="imagePreview"
+                       class="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity rounded-xl"
+                       style="background:rgba(0,0,0,0.35)">
+                    <span class="text-white text-xs font-semibold">🔄 Changer l'image</span>
+                  </div>
+
+                  <input
+                    ref="fileInputRef"
+                    type="file"
+                    accept="image/png, image/jpeg, image/webp"
+                    class="hidden"
+                    @change="onFileChange" />
+                </label>
+
+                <!-- Bouton supprimer l'image -->
+                <button
+                  v-if="imagePreview"
+                  @click.prevent="clearImage"
+                  class="mt-2 flex items-center gap-1 text-xs font-semibold transition-colors"
+                  style="color:#E8192C">
+                  ✕ Supprimer l'image
+                </button>
+
+                <!-- Erreur taille fichier -->
+                <p v-if="imageError" class="mt-1.5 text-xs" style="color:#E8192C">{{ imageError }}</p>
+              </div>
+              <!-- ── FIN IMAGE UPLOAD ── -->
+
+              <!-- Checkboxes -->
               <div class="flex gap-6">
                 <label class="flex items-center gap-2 cursor-pointer">
                   <input v-model="itemForm.is_available" type="checkbox" class="w-4 h-4 accent-red-600" />
@@ -192,6 +256,7 @@
                   <span class="text-sm font-medium" style="color:#555">🔥 Populaire</span>
                 </label>
               </div>
+
               <p v-if="itemFormError" class="text-xs rounded-xl px-3 py-2 text-center"
                  style="background:#FFF0F1; color:#E8192C; border:1px solid #FFCDD0">
                 {{ itemFormError }}
@@ -306,226 +371,507 @@
 
   </div>
 </template>
-
 <script setup>
 import { ref, onMounted } from 'vue'
 import adminService from '@/services/adminService'
 import { useRestaurantStore } from '@/stores/restaurantStore'
 
-const restStore  = useRestaurantStore()
-const categories = ref([])
-const loading    = ref(true)
-const openCats   = ref([])
+const restStore = useRestaurantStore()
 
-// ── Item form ─────────────────────────────────────────────────────────
-const showItemForm  = ref(false)
-const editingItem   = ref(null)
-const savingItem    = ref(false)
+const categories = ref([])
+const loading = ref(true)
+const openCats = ref([])
+
+// ── ITEM FORM ─────────────────────────────────────
+const showItemForm = ref(false)
+const editingItem = ref(null)
+const savingItem = ref(false)
 const itemFormError = ref('')
-const itemForm      = ref(emptyItemForm())
+
+const itemForm = ref(emptyItemForm())
+
+// ── IMAGE ─────────────────────────────────────────
+const fileInputRef = ref(null)
+const imageFile = ref(null)
+const imagePreview = ref('')
+const imageError = ref('')
+const dragOver = ref(false)
+
+const MAX_SIZE_MB = 2
 
 function emptyItemForm(categoryId = '') {
-  return { category_id: categoryId, name: '', description: '', price: '', image: '', is_available: true, is_popular: false }
+  return {
+    category_id: categoryId,
+    name: '',
+    description: '',
+    price: '',
+    is_available: true,
+    is_popular: false,
+  }
 }
 
-// ── Category form ─────────────────────────────────────────────────────
-const showCatForm  = ref(false)
-const editingCat   = ref(null)
-const savingCat    = ref(false)
+// ── CATEGORY FORM ─────────────────────────────────
+const showCatForm = ref(false)
+const editingCat = ref(null)
+const savingCat = ref(false)
 const catFormError = ref('')
-const catForm      = ref({ name: '', sort_order: '' })
 
-// ── Delete ────────────────────────────────────────────────────────────
-const deleteTarget = ref(null)   // { type: 'item'|'category', id, name, category_id? }
+const catForm = ref({
+  name: '',
+  sort_order: ''
+})
 
-// ── Load ──────────────────────────────────────────────────────────────
+// ── DELETE ────────────────────────────────────────
+const deleteTarget = ref(null)
+
+// ── HELPERS ───────────────────────────────────────
+function getRestaurantId() {
+  return (
+    restStore.restaurant?.id ||
+    restStore.menu?.restaurant_id ||
+    localStorage.getItem('restaurant_id') ||
+    1
+  )
+}
+
+function getImageUrl(path) {
+  if (!path) return ''
+
+  if (
+    path.startsWith('http') ||
+    path.startsWith('blob:')
+  ) {
+    return path
+  }
+
+  return `http://localhost:8000/storage/${path}`
+}
+
+// ── IMAGE HANDLERS ────────────────────────────────
+function applyFile(file) {
+
+  imageError.value = ''
+
+  if (!file) return
+
+  if (!file.type.startsWith('image/')) {
+    imageError.value =
+      'Fichier non supporté. Utilisez PNG, JPG ou WEBP.'
+    return
+  }
+
+  if (file.size > MAX_SIZE_MB * 1024 * 1024) {
+    imageError.value =
+      `L'image dépasse ${MAX_SIZE_MB} Mo.`
+    return
+  }
+
+  imageFile.value = file
+
+  if (imagePreview.value?.startsWith('blob:')) {
+    URL.revokeObjectURL(imagePreview.value)
+  }
+
+  imagePreview.value = URL.createObjectURL(file)
+}
+
+function onFileChange(e) {
+  applyFile(e.target.files[0])
+}
+
+function onDrop(e) {
+  dragOver.value = false
+  applyFile(e.dataTransfer.files[0])
+}
+
+function clearImage() {
+
+  if (imagePreview.value?.startsWith('blob:')) {
+    URL.revokeObjectURL(imagePreview.value)
+  }
+
+  imageFile.value = null
+  imagePreview.value = ''
+  imageError.value = ''
+
+  if (fileInputRef.value) {
+    fileInputRef.value.value = ''
+  }
+}
+
+// ── LOAD ──────────────────────────────────────────
 async function load() {
+
   loading.value = true
 
   try {
-    const restaurantId = restStore.restaurant?.id || 1
 
-    // ── FETCH API ─────────────────────────────
+    const restaurantId = getRestaurantId()
+
+    console.log('Restaurant ID chargé :', restaurantId)
+
     const [catsRes, itemsRes] = await Promise.all([
       adminService.getCategories(restaurantId),
       adminService.getMenuItems(restaurantId),
     ])
 
-    // ── FIX API STRUCTURE ─────────────────────
-    const cats = catsRes.data.data || catsRes.data || []
-    const allItems = itemsRes.data.data || itemsRes.data || []
+    const cats =
+      catsRes.data.data || catsRes.data || []
 
-    console.log('CATEGORIES =>', cats)
-    console.log('ITEMS =>', allItems)
+    const allItems =
+      itemsRes.data.data || itemsRes.data || []
 
-    // ── BUILD CATEGORIES WITH ITEMS ───────────
     categories.value = cats.map(cat => ({
       ...cat,
 
       menu_items: allItems
-        .filter(item => item.category_id === cat.id)
-        .sort((a, b) => Number(b.is_popular) - Number(a.is_popular)),
+        .filter(
+          item => item.category_id === cat.id
+        )
+        .sort(
+          (a, b) =>
+            Number(b.is_popular) -
+            Number(a.is_popular)
+        )
     }))
 
-    // ── OPEN ALL CATEGORIES ───────────────────
-    openCats.value = categories.value.map(cat => cat.id)
+    openCats.value =
+      categories.value.map(cat => cat.id)
 
   } catch (error) {
-    console.error('Erreur chargement menu :', error)
+
+    console.error(
+      'Erreur chargement menu :',
+      error
+    )
+
   } finally {
+
     loading.value = false
   }
 }
 
 onMounted(load)
 
+// ── TOGGLE CATEGORY ───────────────────────────────
 function toggleCat(id) {
+
   const idx = openCats.value.indexOf(id)
-  if (idx === -1) openCats.value.push(id)
-  else openCats.value.splice(idx, 1)
+
+  if (idx === -1) {
+    openCats.value.push(id)
+  } else {
+    openCats.value.splice(idx, 1)
+  }
 }
 
-// ── Stock ─────────────────────────────────────────────────────────────
+// ── STOCK ─────────────────────────────────────────
 async function toggleStock(item) {
+
   try {
-    const { data } = await adminService.toggleStock(item.id)
+
+    const { data } =
+      await adminService.toggleStock(item.id)
+
     item.is_available = data.is_available
-    restStore.restaurant = null   // invalidate menu cache
-  } catch {
-    alert('Erreur lors de la mise à jour du stock.')
+
+  } catch (e) {
+
+    console.error(e)
+
+    alert(
+      'Erreur lors de la mise à jour du stock.'
+    )
   }
 }
 
-// ── Item CRUD ─────────────────────────────────────────────────────────
+// ── OPEN ADD ITEM ─────────────────────────────────
 function openAddItem(categoryId = '') {
+
   editingItem.value = null
+
   itemForm.value = emptyItemForm(categoryId)
+
   itemFormError.value = ''
+
+  clearImage()
+
   showItemForm.value = true
 }
 
+// ── OPEN EDIT ITEM ────────────────────────────────
 function openEditItem(item) {
+
   editingItem.value = item
+
   itemForm.value = {
-    category_id:  item.category_id,
-    name:         item.name,
-    description:  item.description || '',
-    price:        item.price,
-    image:        item.image || '',
+    category_id: item.category_id,
+    name: item.name,
+    description: item.description || '',
+    price: item.price,
     is_available: item.is_available,
-    is_popular:   item.is_popular,
+    is_popular: item.is_popular,
   }
+
   itemFormError.value = ''
+
+  imageFile.value = null
+  imageError.value = ''
+
+  imagePreview.value =
+    item.image
+      ? getImageUrl(item.image)
+      : ''
+
+  if (fileInputRef.value) {
+    fileInputRef.value.value = ''
+  }
+
   showItemForm.value = true
 }
 
+// ── SAVE ITEM ─────────────────────────────────────
 async function saveItem() {
+
   itemFormError.value = ''
-  if (!itemForm.value.name || !itemForm.value.price || !itemForm.value.category_id) {
-    itemFormError.value = 'Nom, prix et catégorie sont obligatoires.'
+
+  if (
+    !itemForm.value.name ||
+    !itemForm.value.price ||
+    !itemForm.value.category_id
+  ) {
+    itemFormError.value =
+      'Nom, prix et catégorie sont obligatoires.'
     return
   }
+
+  const restaurantId = getRestaurantId()
+
   savingItem.value = true
+
   try {
-    const payload = {
-      ...itemForm.value,
-      restaurant_id: restStore.restaurant?.id || 1,
-      price:         Number(itemForm.value.price),
-      image:         itemForm.value.image || null,
+
+    const payload = new FormData()
+
+    payload.append('restaurant_id', restaurantId)
+    payload.append('category_id', itemForm.value.category_id)
+    payload.append('name', itemForm.value.name)
+    payload.append('description', itemForm.value.description || '')
+    payload.append('price', Number(itemForm.value.price))
+    payload.append('is_available', itemForm.value.is_available ? 1 : 0)
+    payload.append('is_popular', itemForm.value.is_popular ? 1 : 0)
+
+    if (imageFile.value instanceof File) {
+      payload.append('image', imageFile.value, imageFile.value.name)
     }
+
     if (editingItem.value) {
-      const { data } = await adminService.updateMenuItem(editingItem.value.id, payload)
-      const cat = categories.value.find(c => c.id === data.category_id)
-      if (cat) {
-        const idx = cat.menu_items.findIndex(i => i.id === data.id)
-        if (idx !== -1) cat.menu_items[idx] = data
-        else cat.menu_items.push(data)
-      }
-    } else {
-      await adminService.createMenuItem(payload)
-      await load()
+      payload.append('_method', 'PUT')
     }
+
+    const response = editingItem.value
+      ? await adminService.updateMenuItem(editingItem.value.id, payload)
+      : await adminService.createMenuItem(payload)
+
+    await load()
+
     showItemForm.value = false
-    restStore.restaurant = null
+    clearImage()
+
   } catch (e) {
-    itemFormError.value = e.response?.data?.message || 'Erreur lors de l\'enregistrement.'
-  } finally {
+
+    console.error(e)
+
+    itemFormError.value =
+      e.response?.data?.message ||
+      Object.values(e.response?.data?.errors || {}).flat().join(' | ')
+  }
+
+  finally {
     savingItem.value = false
   }
 }
 
+// ── DELETE ITEM ───────────────────────────────────
 function confirmDeleteItem(item) {
-  deleteTarget.value = { type: 'item', id: item.id, name: item.name, category_id: item.category_id }
+
+  deleteTarget.value = {
+    type: 'item',
+    id: item.id,
+    name: item.name,
+    category_id: item.category_id
+  }
 }
 
-// ── Category CRUD ─────────────────────────────────────────────────────
+// ── CATEGORY CRUD ─────────────────────────────────
 function openAddCategory() {
+
   editingCat.value = null
-  catForm.value = { name: '', sort_order: categories.value.length + 1 }
+
+  catForm.value = {
+    name: '',
+    sort_order:
+      categories.value.length + 1
+  }
+
   catFormError.value = ''
+
   showCatForm.value = true
 }
 
 function openEditCategory(cat) {
+
   editingCat.value = cat
-  catForm.value = { name: cat.name, sort_order: cat.sort_order }
+
+  catForm.value = {
+    name: cat.name,
+    sort_order: cat.sort_order
+  }
+
   catFormError.value = ''
+
   showCatForm.value = true
 }
 
 async function saveCategory() {
+
   catFormError.value = ''
-  if (!catForm.value.name) { catFormError.value = 'Le nom est obligatoire.'; return }
+
+  if (!catForm.value.name) {
+    catFormError.value =
+      'Le nom est obligatoire.'
+    return
+  }
+
   savingCat.value = true
+
   try {
+
     const payload = {
-      name:          catForm.value.name,
-      sort_order:    Number(catForm.value.sort_order) || 0,
-      restaurant_id: restStore.restaurant?.id || 1,
+      name: catForm.value.name,
+
+      sort_order:
+        Number(catForm.value.sort_order) || 0,
+
+      restaurant_id:
+        getRestaurantId(),
     }
+
     if (editingCat.value) {
-      const { data } = await adminService.updateCategory(editingCat.value.id, payload)
-      const idx = categories.value.findIndex(c => c.id === data.id)
-      if (idx !== -1) categories.value[idx] = { ...categories.value[idx], ...data }
+
+      const response =
+        await adminService.updateCategory(
+          editingCat.value.id,
+          payload
+        )
+
+      const data =
+        response.data.data || response.data
+
+      const idx =
+        categories.value.findIndex(
+          c => c.id === data.id
+        )
+
+      if (idx !== -1) {
+        categories.value[idx] = {
+          ...categories.value[idx],
+          ...data
+        }
+      }
+
     } else {
-      await adminService.createCategory(payload)
+
+      await adminService.createCategory(
+        payload
+      )
+
       await load()
     }
+
     showCatForm.value = false
-    restStore.restaurant = null
+
   } catch (e) {
-    catFormError.value = e.response?.data?.message || 'Erreur lors de l\'enregistrement.'
+
+    console.error(e)
+
+    catFormError.value =
+      e.response?.data?.message ||
+      'Erreur lors de l’enregistrement.'
+
   } finally {
+
     savingCat.value = false
   }
 }
 
+// ── DELETE CATEGORY ───────────────────────────────
 function confirmDeleteCategory(cat) {
-  deleteTarget.value = { type: 'category', id: cat.id, name: cat.name }
+
+  deleteTarget.value = {
+    type: 'category',
+    id: cat.id,
+    name: cat.name
+  }
 }
 
-// ── Execute delete (item or category) ────────────────────────────────
+// ── EXECUTE DELETE ────────────────────────────────
 async function executeDelete() {
+
   if (!deleteTarget.value) return
+
   try {
-    if (deleteTarget.value.type === 'item') {
-      await adminService.deleteMenuItem(deleteTarget.value.id)
-      const cat = categories.value.find(c => c.id === deleteTarget.value.category_id)
-      if (cat) cat.menu_items = cat.menu_items.filter(i => i.id !== deleteTarget.value.id)
+
+    if (
+      deleteTarget.value.type === 'item'
+    ) {
+
+      await adminService.deleteMenuItem(
+        deleteTarget.value.id
+      )
+
+      const cat =
+        categories.value.find(
+          c =>
+            c.id ===
+            deleteTarget.value.category_id
+        )
+
+      if (cat) {
+        cat.menu_items =
+          cat.menu_items.filter(
+            i =>
+              i.id !==
+              deleteTarget.value.id
+          )
+      }
+
     } else {
-      await adminService.deleteCategory(deleteTarget.value.id)
-      categories.value = categories.value.filter(c => c.id !== deleteTarget.value.id)
+
+      await adminService.deleteCategory(
+        deleteTarget.value.id
+      )
+
+      categories.value =
+        categories.value.filter(
+          c =>
+            c.id !==
+            deleteTarget.value.id
+        )
     }
+
     deleteTarget.value = null
-    restStore.restaurant = null
+
   } catch (e) {
-    alert(e.response?.data?.message || 'Erreur lors de la suppression.')
+
+    console.error(e)
+
+    alert(
+      e.response?.data?.message ||
+      'Erreur lors de la suppression.'
+    )
+
     deleteTarget.value = null
   }
 }
 </script>
-
-<style scoped>
-.modal-enter-active, .modal-leave-active { transition: opacity 0.2s ease; }
-.modal-enter-from, .modal-leave-to       { opacity: 0; }
-</style>

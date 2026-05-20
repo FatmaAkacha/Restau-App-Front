@@ -18,8 +18,19 @@ export default {
 
   // ── Menu Items ──────────────────────────────────────────────────────
   getMenuItems:       (restaurantId) => api.get('/admin/menu-items', { params: { restaurant_id: restaurantId } }),
-  createMenuItem:     (data)         => api.post('/admin/menu-items', data),
-  updateMenuItem:     (id, data)     => api.put(`/admin/menu-items/${id}`, data),
+  createMenuItem: (data) =>
+  api.post('/admin/menu-items', data, {
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  }),
+
+updateMenuItem: (id, data) =>
+  api.post(`/admin/menu-items/${id}`, data, {
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  }),
   deleteMenuItem:     (id)           => api.delete(`/admin/menu-items/${id}`),
   toggleStock:        (id)           => api.patch(`/admin/menu-items/${id}/toggle-stock`),
 }
