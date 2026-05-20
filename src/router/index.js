@@ -7,6 +7,7 @@ import AdminDashboard  from '@/views/AdminDashboard.vue'
 import StaffDashboard  from '@/views/StaffDashboard.vue'
 import AdminProducts   from '@/views/AdminProducts.vue'
 import AdminUsers      from '@/views/AdminUsers.vue'
+import AdminIngredients from '@/views/AdminIngredients.vue'
 import AdminLogin      from '@/views/AdminLogin.vue'
 import { useAuthStore } from '@/stores/authStore'
 
@@ -53,6 +54,13 @@ const router = createRouter({
     {
       path: '/admin/utilisateurs',
       component: AdminUsers,
+      meta: { requiresAuth: true, requiresAdmin: true },
+    },
+
+    // Admin ingredients management (admin only)
+    {
+      path: '/admin/ingredients',
+      component: AdminIngredients,
       meta: { requiresAuth: true, requiresAdmin: true },
     },
   ],

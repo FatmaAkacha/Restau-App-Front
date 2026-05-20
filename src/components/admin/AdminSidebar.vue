@@ -106,6 +106,19 @@
           <span>Utilisateurs</span>
         </router-link>
 
+        <!-- Ingrédients (admin only) -->
+        <router-link
+          v-if="auth.user?.role === 'admin'"
+          to="/admin/ingredients"
+          @click="mobileMenuOpen = false"
+          class="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all"
+          :class="isActive('/admin/ingredients') ? 'text-white' : 'text-gray-400 hover:text-white'"
+          :style="isActive('/admin/ingredients') ? 'background:linear-gradient(135deg,#E8192C,#A50E1C)' : ''"
+        >
+          <span class="text-lg">🥩</span>
+          <span>Ingrédients</span>
+        </router-link>
+
       </nav>
 
       <!-- Footer -->

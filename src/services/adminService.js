@@ -33,4 +33,12 @@ updateMenuItem: (id, data) =>
   }),
   deleteMenuItem:     (id)           => api.delete(`/admin/menu-items/${id}`),
   toggleStock:        (id)           => api.patch(`/admin/menu-items/${id}/toggle-stock`),
+
+  // ── Ingredients ─────────────────────────────────────────────────────
+  getIngredients:     (restaurantId) => api.get('/admin/ingredients', { params: { restaurant_id: restaurantId } }),
+  createIngredient:   (data)         => api.post('/admin/ingredients', data),
+  updateIngredient:   (id, data)     => api.put(`/admin/ingredients/${id}`, data),
+  deleteIngredient:   (id)           => api.delete(`/admin/ingredients/${id}`),
+  updateIngredientQuantity: (id, quantity) => api.patch(`/admin/ingredients/${id}/quantity`, { quantity }),
+  getIngredientCategories: (restaurantId) => api.get('/admin/ingredients/categories', { params: { restaurant_id: restaurantId } }),
 }

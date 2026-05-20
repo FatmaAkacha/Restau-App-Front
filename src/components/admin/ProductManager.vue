@@ -77,6 +77,7 @@
                           :alt="item.name"
                           class="w-full h-full object-cover"
                           loading="lazy"
+                          decoding="async"
                           @error="e => e.target.style.display='none'"
                         />
                       </div>
@@ -536,24 +537,14 @@ async function load() {
 
     console.log('Restaurant ID chargé :', restaurantId)
 
-    const [catsRes, itemsRes] = await Promise.all([
-      adminService.getCategories(restaurantId),
-      adminService.getMenuItems(restaurantId),
-    ])
+    // Charger les catégories avec les produits en une seule requête
+    const catsRes = await adminService.getCategories(restaurantId)
 
-    const cats =
-      catsRes.data.data || catsRes.data || []
-
-    const allItems =
-      itemsRes.data.data || itemsRes.data || []
+    const cats = catsRes.data.data || catsRes.data || []
 
     categories.value = cats.map(cat => ({
       ...cat,
-
-      menu_items: allItems
-        .filter(
-          item => item.category_id === cat.id
-        )
+      menu_items: (cat.menu_items || [])
         .sort(
           (a, b) =>
             Number(b.is_popular) -
@@ -561,8 +552,10 @@ async function load() {
         )
     }))
 
-    openCats.value =
-      categories.value.map(cat => cat.id)
+    // Ouvrir seulement les 3 premières catégories pour améliorer les performances
+    openCats.value = categories.value
+      .slice(0, 3)
+      .map(cat => cat.id)
 
   } catch (error) {
 
