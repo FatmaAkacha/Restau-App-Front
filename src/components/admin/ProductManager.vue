@@ -71,13 +71,19 @@
                     <div class="flex items-center gap-2">
                       <div class="w-8 h-8 rounded-lg overflow-hidden flex-shrink-0"
                            style="background:#F0F0F0">
-                        <img v-if="item.image"
-                             :src="getImageUrl(item.image)"
-                             :alt="item.name"
-                             class="w-full h-full object-cover"
-                             @error="e => e.target.style.display='none'" />
+                        <img
+                          v-if="item.image"
+                          :src="getImageUrl(item.image)"
+                          :alt="item.name"
+                          class="w-full h-full object-cover"
+                          loading="lazy"
+                          @error="e => e.target.style.display='none'"
+                        />
                       </div>
                       <span class="font-medium" style="color:#1A1A1A">{{ item.name }}</span>
+                     
+                      <p class="text-xs">{{ item.image }}</p>
+
                     </div>
                   </td>
                   <!-- Price -->
@@ -437,14 +443,35 @@ function getRestaurantId() {
 function getImageUrl(path) {
   if (!path) return ''
 
+  // URL externe complète (déjà complète)
   if (
-    path.startsWith('http') ||
-    path.startsWith('blob:')
+    path.startsWith('http://') ||
+    path.startsWith('https://')
   ) {
     return path
   }
 
-  return `http://localhost:8000/storage/${path}`
+  // preview locale blob
+  if (path.startsWith('blob:')) {
+    return path
+  }
+
+  // image venant du storage Laravel
+  if (path.startsWith('storage/')) {
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000/api'
+    const baseUrl = apiUrl.replace('/api', '')
+    return `${baseUrl}/${path}`
+  }
+
+  // image déjà avec /storage
+  if (path.startsWith('/storage/')) {
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000/api'
+    const baseUrl = apiUrl.replace('/api', '')
+    return `${baseUrl}${path}`
+  }
+
+  // image locale frontend (fichiers dans public/images/menu)
+  return `/images/menu/${path}`
 }
 
 // ── IMAGE HANDLERS ────────────────────────────────
