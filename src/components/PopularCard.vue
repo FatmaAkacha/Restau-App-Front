@@ -9,7 +9,7 @@
       <div class="h-28 relative overflow-hidden"
            style="background:linear-gradient(135deg,#FFF0F1,#FFE4E6)">
         <img v-if="item.image"
-             :src="`/images/menu/${item.image}`"
+             :src="getImageUrl(item.image)"
              :alt="item.name"
              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
              @error="e => e.target.style.display='none'" />
@@ -84,6 +84,40 @@ function handleClick() {
 
 function onCustomized(customizedItem) {
   emit('add', customizedItem)
+}
+
+function getImageUrl(path) {
+  if (!path) return ''
+
+  // URL externe complète (déjà complète)
+  if (
+    path.startsWith('http://') ||
+    path.startsWith('https://')
+  ) {
+    return path
+  }
+
+  // preview locale blob
+  if (path.startsWith('blob:')) {
+    return path
+  }
+
+  // image venant du storage Laravel
+  if (path.startsWith('storage/')) {
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000/api'
+    const baseUrl = apiUrl.replace('/api', '')
+    return `${baseUrl}/${path}`
+  }
+
+  // image déjà avec /storage
+  if (path.startsWith('/storage/')) {
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000/api'
+    const baseUrl = apiUrl.replace('/api', '')
+    return `${baseUrl}${path}`
+  }
+
+  // image locale frontend (fichiers dans public/images/menu)
+  return `/images/menu/${path}`
 }
 
 const emoji = computed(() => {

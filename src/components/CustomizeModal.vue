@@ -18,7 +18,7 @@
               <div class="w-12 h-12 rounded-xl overflow-hidden flex-shrink-0"
                    style="background:#F7F7F7">
                 <img v-if="previewImage"
-                     :src="`/images/menu/${previewImage}`"
+                     :src="getImageUrl(previewImage)"
                      :alt="item.name"
                      class="w-full h-full object-cover"
                      @error="e => e.target.style.display='none'" />
@@ -80,7 +80,7 @@
                            ? 'background:linear-gradient(135deg,#FFF0F1,#FFD6D9)'
                            : 'background:linear-gradient(135deg,#F5F5F5,#EBEBEB)'">
                       <img v-if="choice.image"
-                           :src="`/images/menu/${choice.image}`"
+                           :src="getImageUrl(choice.image)"
                            :alt="choice.label"
                            class="w-full h-full"
                            :class="choice.key === 'merguez'
@@ -170,6 +170,41 @@ watch(() => props.item, () => {
   selections.value = {}
   notes.value = ''
 })
+
+// ── Image URL helper ───────────────────────────────────────────────────
+function getImageUrl(path) {
+  if (!path) return ''
+
+  // URL externe complète (déjà complète)
+  if (
+    path.startsWith('http://') ||
+    path.startsWith('https://')
+  ) {
+    return path
+  }
+
+  // preview locale blob
+  if (path.startsWith('blob:')) {
+    return path
+  }
+
+  // image venant du storage Laravel
+  if (path.startsWith('storage/')) {
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000/api'
+    const baseUrl = apiUrl.replace('/api', '')
+    return `${baseUrl}/${path}`
+  }
+
+  // image déjà avec /storage
+  if (path.startsWith('/storage/')) {
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000/api'
+    const baseUrl = apiUrl.replace('/api', '')
+    return `${baseUrl}${path}`
+  }
+
+  // image locale frontend (fichiers dans public/images/menu)
+  return `/images/menu/${path}`
+}
 
 // ── Emoji fallback ─────────────────────────────────────────────────────
 function viandEmoji(key) {
