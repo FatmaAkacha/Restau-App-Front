@@ -458,14 +458,14 @@ function getImageUrl(path) {
 
   // image venant du storage Laravel
   if (path.startsWith('storage/')) {
-    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000/api'
+    const apiUrl = import.meta.env.VITE_API_URL || 'https://goodnaan.com/api'
     const baseUrl = apiUrl.replace('/api', '')
     return `${baseUrl}/${path}`
   }
 
   // image déjà avec /storage
   if (path.startsWith('/storage/')) {
-    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000/api'
+    const apiUrl = import.meta.env.VITE_API_URL || 'https://goodnaan.com/api'
     const baseUrl = apiUrl.replace('/api', '')
     return `${baseUrl}${path}`
   }

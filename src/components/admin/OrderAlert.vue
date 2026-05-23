@@ -85,7 +85,7 @@
 
         <!-- Actions -->
         <div class="flex gap-2">
-          <button @click="$emit('accept', prepTime)"
+          <button @click="handleAccept()"
                   class="flex-1 text-white font-semibold py-2 md:py-2.5 rounded-xl text-xs md:text-sm transition-all"
                   style="background:#16a34a"
                   onmouseover="this.style.background='#15803d'"
@@ -119,9 +119,24 @@
 
 <script setup>
 import { ref } from 'vue'
-defineProps({ order: Object, isNew: Boolean })
-defineEmits(['accept', 'reject'])
+import { printOrderReceipt } from '@/utils/printReceipt'
+
+const props = defineProps({ order: Object, isNew: Boolean })
+const emit = defineEmits(['accept', 'reject'])
+
 const prepTime     = ref(20)
 const showReject   = ref(false)
 const rejectReason = ref('')
-</script>
+
+function handleAccept() {
+  // Print the receipt automatically
+  printOrderReceipt(props.order)
+  // Emit the accept event
+  emit('accept', prepTime.value)
+}
+</script>function handleAccept() {
+  // Print the receipt automatically
+  printOrderReceipt(props.order)
+  // Emit the accept event
+  emit('accept', prepTime.value)
+}

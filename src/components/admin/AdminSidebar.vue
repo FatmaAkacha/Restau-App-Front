@@ -115,8 +115,8 @@
           :class="isActive('/admin/ingredients') ? 'text-white' : 'text-gray-400 hover:text-white'"
           :style="isActive('/admin/ingredients') ? 'background:linear-gradient(135deg,#E8192C,#A50E1C)' : ''"
         >
-          <span class="text-lg">🥩</span>
-          <span>Ingrédients</span>
+      <span class="text-lg">🧑‍🍳</span>
+      <span>Ingrédients</span>
         </router-link>
 
       </nav>

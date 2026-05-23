@@ -29,7 +29,7 @@ const router = createRouter({
     // Admin dashboard — orders only (accessible to admin and staff)
     {
       path: '/admin',
-      component: () => {
+      component: async () => {
         const auth = useAuthStore()
         return auth.user?.role === 'admin' ? AdminDashboard : StaffDashboard
       },

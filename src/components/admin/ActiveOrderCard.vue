@@ -60,6 +60,12 @@
 
     <!-- Pipeline buttons -->
     <div class="flex gap-2 flex-wrap">
+      <button @click="printOrderReceipt(props.order)"
+              class="flex-1 min-w-24 text-xs font-semibold py-2 rounded-xl border transition-all"
+              style="border-color:#E5E5E5; color:#555; background:#F0F7FF"
+              title="Imprimer le reçu">
+        🖨️ Imprimer
+      </button>
       <button v-for="next in nextStatuses" :key="next.value"
               @click="$emit('status', next.value)"
               class="flex-1 min-w-24 text-xs font-semibold py-2 rounded-xl border transition-all"
@@ -75,6 +81,7 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import StatusBadge from '@/components/StatusBadge.vue'
+import { printOrderReceipt } from '@/utils/printReceipt'
 
 const props = defineProps({ order: Object })
 defineEmits(['status'])
