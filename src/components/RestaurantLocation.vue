@@ -1,5 +1,5 @@
 <template>
-  <section class="py-10">
+  <section class="py-10" style="padding-left: 1rem;">
 
     <!-- Title -->
     <div class="flex items-center gap-4 mb-8">
@@ -92,7 +92,7 @@
     </div>
 
     <!-- Google Maps -->
-    <div class="overflow-hidden rounded-3xl shadow-md border"
+    <div class="overflow-hidden rounded-3xl shadow-md border mb-8"
          style="border-color:#E5E5E5">
 
       <iframe

@@ -33,14 +33,11 @@
           <p class="text-xs mt-0.5" style="color:#888">
             Cheese Naan · Tortilla · Tacos · Bowls · Pizza
           </p>
-          <div class="mt-2">
-            <RestaurantSocialLinks :socialLinks="restaurant.social_media_links" />
-          </div>
         </div>
       </div>
 
       <!-- Stats row -->
-      <div class="flex flex-wrap gap-4 text-sm pb-"
+      <div class="flex flex-wrap gap-4 text-sm pb-4"
            style="border-bottom:1px solid #E5E5E5">
         <span class="flex items-center gap-1" style="color:#555">
           ⭐
@@ -61,10 +58,11 @@
                   ? 'background:#16a34a; animation:pulse 2s infinite'
                   : 'background:#E8192C'" />
           {{ isOpen ? 'Ouvert' : 'Fermé' }}
+                   <br>
+
           <span class="font-normal text-xs" style="color:#AAA">· {{ nextChange }}</span>
         </span>
       </div>
-      
     </div>
   </div>
 </template>

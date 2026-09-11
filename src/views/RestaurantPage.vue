@@ -61,7 +61,7 @@
 
       <RestaurantHero :restaurant="store.restaurant" />
 
-      <div class="max-w-6xl mx-auto px-4 pb-32 lg:flex lg:gap-8 lg:items-start">
+      <div class="max-w-6xl mx-auto lg:flex lg:gap-8 lg:items-start">
 
         <!-- LEFT -->
         <div class="flex-1 min-w-0">
@@ -279,13 +279,30 @@
             </div>
 
             <!-- LOCATION -->
-            <div id="section-location" style="scroll-margin-top:96px">
+            <div style="scroll-margin-top:96px">
             <RestaurantLocation
               address="22 Rue de la Défense Passive, 14000 Caen"
               phone="+33 2 59 16 04 30"
               mapUrl="https://www.google.com/maps?q=22+Rue+de+la+Défense+Passive,+14000+Caen&output=embed"
             />
             </div>
+      <!-- RÉSEAUX SOCIAUX -->
+      <div
+        v-if="store.restaurant?.social_media_links"
+        class="flex flex-col items-center">
+        <div class="flex items-center gap-3 mb-5">
+          <span class="w-8 h-px bg-gray-300"></span>
+          <span
+            class="text-sm font-bold uppercase tracking-widest"
+            style="color:#1A1A1A">Nous suivre</span>
+          <span class="w-8 h-px bg-gray-300"></span>
+        </div>
+
+        <RestaurantSocialLinks
+          :socialLinks="store.restaurant.social_media_links"
+        />
+      </div>
+
 
           </template>
         </div>
@@ -301,7 +318,12 @@
       <MobileCartBar />
 
     </template>
+
+
+  <!-- FOOTER -->
+  <Footer />
   </div>
+
 </template>
 
 <script setup>
@@ -318,6 +340,8 @@ import CartSidebar from '@/components/CartSidebar.vue'
 import MobileCartBar from '@/components/MobileCartBar.vue'
 import RestaurantLocation from '@/components/RestaurantLocation.vue'
 import GoogleReviews from '@/components/GoogleReviews.vue'
+import Footer from '@/components/Footer.vue'
+import RestaurantSocialLinks from '@/components/RestaurantSocialLinks.vue'
 
 const store = useRestaurantStore()
 const cartStore = useCartStore()
