@@ -1,5 +1,5 @@
 <template>
-  <div v-if="hasVisibleLinks" class="flex gap-6 items-center justify-start">
+  <div v-if="hasVisibleLinks" class="flex gap-6 items-center justify-center">
     <!-- TikTok Link -->
     <a
       v-if="socialLinks?.tiktok && socialLinks.tiktok.trim()"

@@ -274,7 +274,10 @@
                 class="relative bg-white/70 backdrop-blur-sm rounded-[32px] p-5 md:p-8 border shadow-sm"
                 style="border-color:#EFEFEF"
               >
-                <GoogleReviews :restaurantId="store.restaurant?.id || 1" />
+                <GoogleReviews 
+                  :restaurantId="store.restaurant?.id || 1"
+                  @open-review-modal="showReviewModal = true"
+                />
               </div>
             </div>
 
@@ -319,6 +322,14 @@
 
     </template>
 
+    <!-- REVIEW MODAL - Rendered at top level for proper z-index stacking -->
+    <ReviewSubmissionModal
+      :isOpen="showReviewModal"
+      :restaurantId="store.restaurant?.id || 1"
+      @close="showReviewModal = false"
+      @submitted="onReviewSubmitted"
+    />
+
 
   <!-- FOOTER -->
   <Footer />
@@ -342,11 +353,13 @@ import RestaurantLocation from '@/components/RestaurantLocation.vue'
 import GoogleReviews from '@/components/GoogleReviews.vue'
 import Footer from '@/components/Footer.vue'
 import RestaurantSocialLinks from '@/components/RestaurantSocialLinks.vue'
+import ReviewSubmissionModal from '@/components/ReviewSubmissionModal.vue'
 
 const store = useRestaurantStore()
 const cartStore = useCartStore()
 
 const search = ref('')
+const showReviewModal = ref(false)
 
 /* ─────────────────────────────
    CHECKOUT NOTES
@@ -372,6 +385,12 @@ function saveCheckoutNotes() {
   cartStore.checkoutNotes = checkoutNotes.value
   localStorage.setItem('checkout_notes', checkoutNotes.value)
   editingNotes.value = false
+}
+
+function onReviewSubmitted(review) {
+  // Handle successful review submission
+  console.log('Review submitted:', review)
+  showReviewModal.value = false
 }
 
 watch(checkoutNotes, (val) => {

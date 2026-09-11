@@ -24,8 +24,7 @@
       </div>
 
       <div class="text-6xl font-black mb-2" style="color:#1A1A1A">
-        <span v-if="rating !== null">{{ rating }}</span>
-        <span v-else class="inline-block w-20 h-14 rounded-xl bg-gray-200 animate-pulse align-middle" />
+        {{ rating }}
       </div>
 
       <!-- Stars -->
@@ -43,21 +42,14 @@
 
       <!-- CTA -->
       <button
-        @click="showReviewModal = true"
+        @click="openModal"
+        type="button"
         class="mt-4 flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold transition-all hover:opacity-80"
-        style="background:#FFF0F1; color:#E8192C; border:1.5px solid #FFCDD0; cursor:pointer; background-color: white; border: none;"
+        style="background: white; color:#E8192C; border: 1.5px solid #FFCDD0; cursor:pointer;"
       >
         ✍️ Laisser un avis
       </button>
     </div>
-
-    <!-- Review Submission Modal -->
-    <ReviewSubmissionModal
-      :isOpen="showReviewModal"
-      :restaurantId="restaurantId"
-      @close="showReviewModal = false"
-      @submitted="onReviewSubmitted"
-    />
 
   </section>
 </template>
@@ -65,7 +57,8 @@
 <script setup>
 import { ref } from 'vue'
 import { useGoogleRating } from '@/composables/useGoogleRating'
-import ReviewSubmissionModal from './ReviewSubmissionModal.vue'
+
+const emit = defineEmits(['open-review-modal'])
 
 defineProps({
   restaurantId: {
@@ -75,11 +68,9 @@ defineProps({
 })
 
 const { rating, reviewCount, source, loading } = useGoogleRating()
-const showReviewModal = ref(false)
 
-const onReviewSubmitted = (review) => {
-  // Handle successful review submission
-  // Could trigger notification, refresh reviews, etc.
-  console.log('Review submitted:', review)
+const openModal = () => {
+  console.log('Opening review modal from GoogleReviews component')
+  emit('open-review-modal')
 }
 </script>
