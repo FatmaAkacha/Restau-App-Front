@@ -4,11 +4,16 @@
     <!-- ── TOP BAR ── -->
     <div class="flex flex-wrap items-center justify-between gap-3">
       <h2 class="font-bold text-lg" style="color:#1A1A1A">Gestion des produits</h2>
-      <div class="flex gap-2">
+      <div class="flex gap-2 flex-wrap">
         <button @click="openAddCategory()"
                 class="px-4 py-2 rounded-xl text-sm font-semibold border transition-all"
                 style="border-color:#E8192C; color:#E8192C; background:#FFF0F1">
           + Catégorie
+        </button>
+        <button @click="showBulkImport = true"
+                class="px-4 py-2 rounded-xl text-sm font-semibold border transition-all"
+                style="border-color:#2563EB; color:#2563EB; background:#F0F7FF">
+          📦 Import en masse
         </button>
         <button @click="openAddItem()"
                 class="px-4 py-2 rounded-xl text-sm font-semibold text-white transition-all"
@@ -375,14 +380,27 @@
       </Transition>
     </Teleport>
 
+    <!-- ══════════════════════════════════════════
+         BULK IMPORT MODAL
+    ══════════════════════════════════════════ -->
+    <BulkImportModal
+      :isOpen="showBulkImport"
+      @close="showBulkImport = false"
+      @imported="onBulkImported"
+    />
+
   </div>
 </template>
 <script setup>
 import { ref, onMounted } from 'vue'
 import adminService from '@/services/adminService'
 import { useRestaurantStore } from '@/stores/restaurantStore'
+import BulkImportModal from '@/components/admin/BulkImportModal.vue'
 
 const restStore = useRestaurantStore()
+
+// ── BULK IMPORT ───────────────────────────────────
+const showBulkImport = ref(false)
 
 const categories = ref([])
 const loading = ref(true)
@@ -892,5 +910,11 @@ async function executeDelete() {
 
     deleteTarget.value = null
   }
+}
+
+// ── BULK IMPORT HANDLER ───────────────────────────
+async function onBulkImported(event) {
+  console.log(`✅ ${event.count} produits importés avec succès`)
+  await load()
 }
 </script>

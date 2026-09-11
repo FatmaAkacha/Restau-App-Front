@@ -274,7 +274,7 @@
                 class="relative bg-white/70 backdrop-blur-sm rounded-[32px] p-5 md:p-8 border shadow-sm"
                 style="border-color:#EFEFEF"
               >
-                <GoogleReviews />
+                <GoogleReviews :restaurantId="store.restaurant?.id || 1" />
               </div>
             </div>
 

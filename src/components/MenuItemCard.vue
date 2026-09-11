@@ -67,22 +67,39 @@
       @close="modalItem = null"
       @add="onCustomized"
     />
+
+    <!-- Promo Pizza Selection Modal -->
+    <PromoPizzaSelectModal
+      :isOpen="showPromoModal"
+      :promoItem="item"
+      :availablePizzas="availablePizzas || []"
+      @close="showPromoModal = false"
+      @add="onPromoSelected"
+    />
   </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
 import CustomizeModal from '@/components/CustomizeModal.vue'
+import PromoPizzaSelectModal from '@/components/PromoPizzaSelectModal.vue'
 
-const props = defineProps({ item: Object })
+const props = defineProps({ 
+  item: Object,
+  availablePizzas: Array
+})
 const emit  = defineEmits(['add'])
 
 const modalItem = ref(null)
+const showPromoModal = ref(false)
 
 function handleClick() {
   if (!props.item.is_available) return
   
-  if (props.item?.customization_options?.length) {
+  // Check if this is the 2-pizza promo item
+  if (props.item?.is_promo_item || props.item?.name?.includes('2 pizzas')) {
+    showPromoModal.value = true
+  } else if (props.item?.customization_options?.length) {
     modalItem.value = props.item
   } else {
     emit('add', props.item)
@@ -91,6 +108,10 @@ function handleClick() {
 
 function onCustomized(customizedItem) {
   emit('add', customizedItem)
+}
+
+function onPromoSelected(promoData) {
+  emit('add', promoData)
 }
 
 function getImageUrl(path) {

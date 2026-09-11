@@ -120,12 +120,18 @@
               <span>Sous-total</span>
               <span>€{{ cart.subtotal.toFixed(2) }}</span>
             </div>
-           <div v-if="form.type === 'delivery' && cart.subtotal >= MIN_ORDER"
-              class="flex justify-between"
-              style="color:#888">
-            <span>Frais de livraison</span>
-            <span>€2.50</span>
-          </div>
+            
+            <!-- Delivery Fee Display (replaces hardcoded display) -->
+            <div v-if="form.type === 'delivery' && cart.subtotal >= MIN_ORDER" class="mt-4">
+              <DeliveryPricingDisplay
+                :distance="deliveryDistance"
+                :deliveryFee="deliveryFee"
+                :baseFee="1.99"
+                :perKmRate="0.30"
+                :deliverable="true"
+              />
+            </div>
+            
             <div class="flex justify-between font-bold text-base pt-3"
                  style="border-top:1px solid #E5E5E5; color:#1A1A1A">
               <span>Total</span>
@@ -137,18 +143,54 @@
         <!-- Paiement -->
         <div class="card p-5">
           <h2 class="font-bold text-base mb-4" style="color:#1A1A1A">💳 Paiement</h2>
-          <div class="flex gap-3 mb-5">
+          
+          <!-- Payment Method Selection -->
+          <div class="mb-5 space-y-2">
+            <label class="block text-xs font-medium mb-3" style="color:#888">Méthode de paiement *</label>
+            <div class="space-y-2">
+              <label class="flex items-center p-3 rounded-lg border cursor-pointer transition-all"
+                     :style="form.payment_method === 'card_in_store'
+                       ? 'border-color:#E8192C; background:#FFF0F1'
+                       : 'border-color:#E5E5E5; background:#fff'"
+                     @click="form.payment_method = 'card_in_store'">
+                <input type="radio" v-model="form.payment_method" value="card_in_store" class="mr-3">
+                <div>
+                  <p class="font-semibold text-sm" :style="form.payment_method === 'card_in_store' ? 'color:#E8192C' : 'color:#1A1A1A'">
+                    Carte bleue au comptoir
+                  </p>
+                  <p class="text-xs mt-0.5" style="color:#888">Payer à la réception avec une carte</p>
+                </div>
+              </label>
+              
+              <label class="flex items-center p-3 rounded-lg border cursor-pointer transition-all"
+                     :style="form.payment_method === 'card_delivery'
+                       ? 'border-color:#E8192C; background:#FFF0F1'
+                       : 'border-color:#E5E5E5; background:#fff'"
+                     @click="form.payment_method = 'card_delivery'">
+                <input type="radio" v-model="form.payment_method" value="card_delivery" class="mr-3">
+                <div>
+                  <p class="font-semibold text-sm" :style="form.payment_method === 'card_delivery' ? 'color:#E8192C' : 'color:#1A1A1A'">
+                    Carte bleue à la livraison
+                  </p>
+                  <p class="text-xs mt-0.5" style="color:#888">Payer au livreur avec une carte</p>
+                </div>
+              </label>
+            </div>
+          </div>
+          
+          <!-- Old payment method buttons (kept for backward compatibility, hidden) -->
+          <div class="flex gap-3 mb-5" style="display:none">
             <button v-for="m in ['card','cash']" :key="m"
-                    @click="paymentMethod = m"
+                    @click="legacyPaymentMethod = m"
                     class="flex-1 py-2.5 rounded-xl border text-sm font-semibold transition-all"
-                    :style="paymentMethod === m
+                    :style="legacyPaymentMethod === m
                       ? 'border-color:#E8192C; background:#FFF0F1; color:#E8192C'
                       : 'border-color:#E5E5E5; background:#fff; color:#888'">
               {{ m === 'card' ? '💳 Payer par carte' : '💵 Espèces à la livraison' }}
             </button>
           </div>
 
-          <div v-if="paymentMethod === 'card'">
+          <div v-if="legacyPaymentMethod === 'card'">
             <div id="card-element" class="rounded-xl px-4 py-3.5 border"
                  style="background:#fff; border-color:#E5E5E5" />
             <p v-if="stripeError" class="text-xs mt-2" style="color:#E8192C">{{ stripeError }}</p>
@@ -180,6 +222,18 @@
 </template>
 
 <script setup>
+/**
+ * CheckoutPage Component
+ * 
+ * Handles order checkout flow including:
+ * - Customer information collection
+ * - Delivery/pickup selection
+ * - Real-time delivery fee calculation
+ * - Order type selection (delivery/pickup)
+ * - Payment method selection
+ * - Order submission
+ */
+
 import {
   ref,
   computed,
@@ -196,6 +250,7 @@ import { useRestaurantStore } from '@/stores/restaurantStore'
 
 import orderService from '@/services/orderService'
 import paymentService from '@/services/paymentService'
+import DeliveryPricingDisplay from '@/components/DeliveryPricingDisplay.vue'
 
 const cart = useCartStore()
 const restStore = useRestaurantStore()
@@ -208,12 +263,18 @@ const form = ref({
   delivery_address: '',
   notes: '',
   type: 'delivery',
+  payment_method: 'card_delivery',
 })
 
-const paymentMethod = ref('card')
+const legacyPaymentMethod = ref('card')
 const loading = ref(false)
 const error = ref('')
 const stripeError = ref('')
+
+// Delivery pricing state
+const deliveryDistance = ref(null)
+const deliveryPricingError = ref('')
+const calculatingDeliveryFee = ref(false)
 
 let stripe = null
 let cardElement = null
@@ -221,8 +282,68 @@ let cardElement = null
 const MIN_ORDER = 20
 
 /* ─────────────────────────────
-   NOTES FUSION
+   DELIVERY PRICING
 ───────────────────────────── */
+
+async function calculateDeliveryFee() {
+  if (form.value.type !== 'delivery' || !form.value.delivery_address) {
+    deliveryDistance.value = null
+    deliveryPricingError.value = ''
+    return
+  }
+
+  calculatingDeliveryFee.value = true
+  deliveryPricingError.value = ''
+
+  try {
+    // Parse coordinates from address - for now using mock coordinates
+    // In production, use Google Maps Geocoding API
+    const coordinates = await geocodeAddress(form.value.delivery_address)
+    
+    if (!coordinates) {
+      throw new Error('Unable to parse address')
+    }
+
+    const restaurantId = restStore.restaurant?.id || cart.restaurantId
+    
+    const response = await orderService.calculateDeliveryFee({
+      restaurant_id: restaurantId,
+      customer_latitude: coordinates.lat,
+      customer_longitude: coordinates.lng
+    })
+
+    deliveryDistance.value = response.data.distance_km
+  } catch (err) {
+    deliveryPricingError.value = 'Unable to calculate delivery fee'
+    deliveryDistance.value = null
+  } finally {
+    calculatingDeliveryFee.value = false
+  }
+}
+
+// Mock geocoding for now - parse address to coordinates
+async function geocodeAddress(address) {
+  // Simple mock: default to Paris coordinates for testing
+  // In production, integrate with Google Maps API
+  return {
+    lat: 48.8566,
+    lng: 2.3522
+  }
+}
+
+// Watch address changes to recalculate delivery fee
+watch(() => form.value.delivery_address, () => {
+  calculateDeliveryFee()
+})
+
+// Watch order type changes
+watch(() => form.value.type, () => {
+  if (form.value.type === 'pickup') {
+    deliveryDistance.value = null
+  } else {
+    calculateDeliveryFee()
+  }
+})
 
 // Notes des produits
 const itemNotesSummary = computed(() => {
@@ -271,7 +392,12 @@ const _stopAutoFill = watchEffect(() => {
 const deliveryFee = computed(() => {
   if (form.value.type === 'pickup') return 0
   if (cart.subtotal < MIN_ORDER) return 0
-  return 2.50
+  if (deliveryDistance.value === null) return 0
+  
+  // Formula: base_fee + (distance_km * per_km_rate)
+  const baseFee = 1.99
+  const perKmRate = 0.30
+  return baseFee + (deliveryDistance.value * perKmRate)
 })
 
 const total = computed(() => {
@@ -329,7 +455,7 @@ async function mountCard() {
   })
 }
 
-watch(paymentMethod, async (val) => {
+watch(legacyPaymentMethod, async (val) => {
   if (val === 'card') {
     await mountCard()
   }
@@ -386,6 +512,10 @@ async function placeOrder() {
       // IMPORTANT
       notes: mergedNotes.value || form.value.notes,
 
+      // Include delivery details for delivery orders
+      delivery_distance: form.value.type === 'delivery' ? deliveryDistance.value : null,
+      delivery_fee: form.value.type === 'delivery' ? deliveryFee.value : 0,
+
       items: cart.items.map(i => ({
         menu_item_id: i.id,
         quantity: i.quantity,
@@ -404,7 +534,7 @@ async function placeOrder() {
     const { data: order } =
       await orderService.create(payload)
 
-    if (paymentMethod.value === 'card') {
+    if (legacyPaymentMethod.value === 'card') {
 
       const { data: intent } =
         await paymentService.createIntent(order.id)

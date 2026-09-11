@@ -9,4 +9,7 @@ export default {
 
   /** Update order status */
   updateStatus: (id, status) => api.patch(`/orders/${id}/status`, { status }),
+
+  /** Calculate delivery fee based on address and distance */
+  calculateDeliveryFee: (payload) => api.post('/calculate-delivery-fee', payload),
 }

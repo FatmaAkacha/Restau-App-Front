@@ -26,14 +26,16 @@
           />
 
         </div>
-        <div class="pb-1">
+        <div class="pb-1 flex-1">
           <h1 class="font-black text-2xl" style="color:#1A1A1A; letter-spacing:-1px">
             GOOD<span style="color:#E8192C">NAAN</span>
           </h1>
           <p class="text-xs mt-0.5" style="color:#888">
             Cheese Naan · Tortilla · Tacos · Bowls · Pizza
           </p>
-
+          <div class="mt-2">
+            <RestaurantSocialLinks :socialLinks="restaurant.social_media_links" />
+          </div>
         </div>
       </div>
 
@@ -70,6 +72,7 @@
 <script setup>
 import { useOpenStatus }   from '@/composables/useOpenStatus'
 import { useGoogleRating } from '@/composables/useGoogleRating'
+import RestaurantSocialLinks from './RestaurantSocialLinks.vue'
 
 defineProps({ restaurant: Object })
 
