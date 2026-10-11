@@ -1,257 +1,359 @@
 /**
- * Print receipt for an order
- * Generates a thermal printer-friendly format
+ * Print utility for 80mm thermal printer receipts
+ * Formats order tickets for kitchen/delivery staff
  */
+
 export function printOrderReceipt(order) {
-  const receiptContent = generateReceiptHTML(order)
+  const printWindow = window.open('', '', 'width=600,height=800')
   
-  // Create a hidden iframe for printing
-  const printWindow = window.open('', '', 'width=400,height=600')
-  printWindow.document.write(receiptContent)
+  // Generate receipt HTML optimized for 80mm thermal printer
+  const html = generateReceiptHTML(order)
+  
+  printWindow.document.write(html)
   printWindow.document.close()
   
-  // Wait for content to load, then print
+  // Auto-print after content loads
   printWindow.onload = () => {
     printWindow.print()
-    // Close after printing (optional)
-    // printWindow.close()
+    // Close window after printing
+    setTimeout(() => printWindow.close(), 250)
   }
 }
 
+/**
+ * Generate receipt HTML formatted for 80mm width thermal printer
+ * 80mm = ~30 characters per line at default font
+ */
 function generateReceiptHTML(order) {
-  const items = order.items || []
-  const total = Number(order.total || 0).toFixed(2)
-  const subtotal = (total - (order.delivery_fee || 0)).toFixed(2)
+  const timestamp = new Date(order.created_at).toLocaleString('fr-FR')
+  const orderNumber = String(order.id).padStart(5, '0')
   
-  const itemsHTML = items.map(item => {
-    const lineTotal = (item.price * item.quantity).toFixed(2)
-    return `
-      <tr>
-        <td style="text-align:left; padding:4px 0">${item.quantity}x ${item.name}</td>
-        <td style="text-align:right; padding:4px 0">€${lineTotal}</td>
-      </tr>
-      ${item.customization_summary ? `
-        <tr>
-          <td colspan="2" style="text-align:left; padding:2px 0 4px 20px; font-size:11px; color:#666">
-            ↳ ${item.customization_summary}
-          </td>
-        </tr>
-      ` : ''}
-      ${item.notes ? `
-        <tr>
-          <td colspan="2" style="text-align:left; padding:2px 0 4px 20px; font-size:11px; color:#999; font-style:italic">
-            📝 ${item.notes}
-          </td>
-        </tr>
-      ` : ''}
-    `
+  // Format items with quantities and notes
+  const itemsHTML = order.items.map(item => {
+    let itemLine = `<div class="item-line">
+      <span class="qty">${item.quantity}×</span>
+      <span class="name">${item.name}</span>
+      <span class="price">€${(item.price * item.quantity).toFixed(2)}</span>
+    </div>`
+    
+    if (item.customization_summary) {
+      itemLine += `<div class="item-detail">→ ${item.customization_summary}</div>`
+    }
+    
+    if (item.notes) {
+      itemLine += `<div class="item-note">📝 ${item.notes}</div>`
+    }
+    
+    return itemLine
   }).join('')
-
-  const timestamp = new Date().toLocaleString('fr-FR', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit'
-  })
-
-  return `
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <meta charset="UTF-8">
-      <title>Reçu Commande #${String(order.id).padStart(3, '0')}</title>
-      <style>
-        * {
-          margin: 0;
-          padding: 0;
-          box-sizing: border-box;
-        }
-        
-        body {
-          font-family: 'Courier New', monospace;
-          font-size: 12px;
-          width: 80mm;
-          padding: 10mm;
-          background: white;
-          color: #000;
-        }
-        
-        .receipt {
-          width: 100%;
-        }
-        
-        .header {
-          text-align: center;
-          margin-bottom: 10px;
-          border-bottom: 2px solid #000;
-          padding-bottom: 8px;
-        }
-        
-        .header h1 {
-          font-size: 16px;
-          font-weight: bold;
-          margin-bottom: 4px;
-        }
-        
-        .header p {
-          font-size: 11px;
-          color: #666;
-        }
-        
-        .order-info {
-          margin-bottom: 10px;
-          padding: 8px 0;
-          border-bottom: 1px dashed #000;
-          font-size: 11px;
-        }
-        
-        .order-info-row {
-          display: flex;
-          justify-content: space-between;
-          margin-bottom: 4px;
-        }
-        
-        .order-info-label {
-          font-weight: bold;
-        }
-        
-        .items {
-          margin-bottom: 10px;
-          padding: 8px 0;
-          border-bottom: 1px dashed #000;
-        }
-        
-        .items table {
-          width: 100%;
-          border-collapse: collapse;
-        }
-        
-        .items td {
-          padding: 4px 0;
-          font-size: 12px;
-        }
-        
-        .items tr:last-child td {
-          border-bottom: 1px solid #000;
-          padding-bottom: 8px;
-        }
-        
-        .totals {
-          margin-bottom: 10px;
-          padding: 8px 0;
-        }
-        
-        .total-row {
-          display: flex;
-          justify-content: space-between;
-          margin-bottom: 4px;
-          font-size: 12px;
-        }
-        
-        .total-row.final {
-          font-weight: bold;
-          font-size: 14px;
-          border-top: 2px solid #000;
-          border-bottom: 2px solid #000;
-          padding: 6px 0;
-          margin: 8px 0;
-        }
-        
-        .footer {
-          text-align: center;
-          font-size: 10px;
-          color: #666;
-          margin-top: 10px;
-          padding-top: 8px;
-          border-top: 1px dashed #000;
-        }
-        
-        .footer p {
-          margin-bottom: 4px;
-        }
-        
-        @media print {
-          body {
-            margin: 0;
-            padding: 0;
-          }
-        }
-      </style>
-    </head>
-    <body>
-      <div class="receipt">
-        <!-- Header -->
-        <div class="header">
-          <h1>GOODNAAN</h1>
-          <p>Commande #${String(order.id).padStart(3, '0')}</p>
-        </div>
-        
-        <!-- Order Info -->
-        <div class="order-info">
-          <div class="order-info-row">
-            <span class="order-info-label">Client:</span>
-            <span>${order.customer_name}</span>
-          </div>
-          <div class="order-info-row">
-            <span class="order-info-label">Tél:</span>
-            <span>${order.customer_phone}</span>
-          </div>
-          <div class="order-info-row">
-            <span class="order-info-label">Type:</span>
-            <span>${order.type === 'delivery' ? 'Livraison' : 'À emporter'}</span>
-          </div>
-          ${order.type === 'delivery' ? `
-            <div class="order-info-row">
-              <span class="order-info-label">Adresse:</span>
-              <span>${order.delivery_address}</span>
-            </div>
-          ` : ''}
-          <div class="order-info-row">
-            <span class="order-info-label">Date:</span>
-            <span>${timestamp}</span>
-          </div>
-        </div>
-        
-        <!-- Items -->
-        <div class="items">
-          <table>
-            <tbody>
-              ${itemsHTML}
-            </tbody>
-          </table>
-        </div>
-        
-        <!-- Totals -->
-        <div class="totals">
-          ${order.delivery_fee ? `
-            <div class="total-row">
-              <span>Sous-total:</span>
-              <span>€${subtotal}</span>
-            </div>
-            <div class="total-row">
-              <span>Frais de livraison:</span>
-              <span>€${Number(order.delivery_fee).toFixed(2)}</span>
-            </div>
-          ` : ''}
-          <div class="total-row final">
-            <span>TOTAL:</span>
-            <span>€${total}</span>
-          </div>
-          <div class="total-row">
-            <span>Paiement:</span>
-            <span>${order.payment_status === 'paid' ? '✓ Payé' : 'Espèces'}</span>
-          </div>
-        </div>
-        
-        <!-- Footer -->
-        <div class="footer">
-          <p>Merci de votre commande!</p>
-          <p>Bon appétit 🍽️</p>
-        </div>
+  
+  // Format order type and payment info
+  const orderType = order.type === 'delivery' ? 'LIVRAISON 🚚' : 'À EMPORTER 🏃'
+  const paymentStatus = order.payment_status === 'paid' 
+    ? 'PAIEMENT: ✅ PAYÉ'
+    : 'PAIEMENT: 💵 À LA RÉCEPTION'
+  
+  // Format address if delivery
+  const addressHTML = order.type === 'delivery' 
+    ? `<div class="section-title">ADRESSE DE LIVRAISON</div>
+       <div class="address">${order.delivery_address}</div>
+       <div class="divider">─────────────────────</div>`
+    : ''
+  
+  // Format notes if present
+  const notesHTML = order.notes 
+    ? `<div class="section-title">NOTES SPÉCIALES</div>
+       <div class="notes">${order.notes}</div>
+       <div class="divider">─────────────────────</div>`
+    : ''
+  
+  // Build complete receipt
+  return `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ticket de Commande #${orderNumber}</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      width: 80mm;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      background: white;
+      padding: 0;
+      margin: 0;
+    }
+    
+    .receipt {
+      width: 80mm;
+      padding: 5mm;
+      background: white;
+      color: black;
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 3mm;
+      border-bottom: 2px dashed #000;
+      padding-bottom: 3mm;
+    }
+    
+    .header-title {
+      font-size: 16px;
+      font-weight: bold;
+      margin-bottom: 2mm;
+    }
+    
+    .order-number {
+      font-size: 14px;
+      font-weight: bold;
+      letter-spacing: 2px;
+      margin: 2mm 0;
+    }
+    
+    .timestamp {
+      font-size: 10px;
+      color: #333;
+    }
+    
+    .customer-info {
+      margin: 3mm 0;
+      border-bottom: 1px solid #000;
+      padding-bottom: 2mm;
+    }
+    
+    .customer-name {
+      font-size: 13px;
+      font-weight: bold;
+      margin-bottom: 1mm;
+    }
+    
+    .customer-phone {
+      font-size: 11px;
+    }
+    
+    .order-type {
+      background: #000;
+      color: white;
+      padding: 2mm;
+      margin: 2mm 0;
+      text-align: center;
+      font-size: 13px;
+      font-weight: bold;
+    }
+    
+    .section-title {
+      font-size: 11px;
+      font-weight: bold;
+      text-transform: uppercase;
+      margin-top: 2mm;
+      margin-bottom: 1mm;
+      border-bottom: 1px solid #000;
+      padding-bottom: 1mm;
+    }
+    
+    .divider {
+      text-align: center;
+      margin: 1mm 0;
+      color: #666;
+    }
+    
+    .items {
+      margin: 2mm 0;
+      border-bottom: 2px solid #000;
+      padding-bottom: 2mm;
+    }
+    
+    .item-line {
+      display: grid;
+      grid-template-columns: 1fr 3fr 1fr;
+      gap: 2mm;
+      margin: 1mm 0;
+      align-items: baseline;
+      font-size: 12px;
+    }
+    
+    .qty {
+      font-weight: bold;
+      text-align: left;
+    }
+    
+    .name {
+      text-align: left;
+      word-wrap: break-word;
+      word-break: break-word;
+    }
+    
+    .price {
+      font-weight: bold;
+      text-align: right;
+    }
+    
+    .item-detail {
+      margin-left: 5mm;
+      font-size: 10px;
+      color: #333;
+      font-style: italic;
+    }
+    
+    .item-note {
+      margin-left: 5mm;
+      font-size: 10px;
+      color: #555;
+    }
+    
+    .address {
+      font-size: 11px;
+      margin-bottom: 1mm;
+      word-wrap: break-word;
+      word-break: break-word;
+      line-height: 1.4;
+    }
+    
+    .notes {
+      font-size: 11px;
+      margin-bottom: 1mm;
+      word-wrap: break-word;
+      word-break: break-word;
+      line-height: 1.4;
+    }
+    
+    .totals {
+      margin: 2mm 0;
+      border-top: 2px solid #000;
+      padding-top: 2mm;
+    }
+    
+    .total-row {
+      display: flex;
+      justify-content: space-between;
+      margin: 1mm 0;
+      font-size: 12px;
+    }
+    
+    .total-row.subtotal {
+      font-weight: normal;
+    }
+    
+    .total-row.delivery {
+      font-weight: normal;
+      font-size: 11px;
+    }
+    
+    .total-row.final {
+      font-size: 14px;
+      font-weight: bold;
+      border-top: 1px solid #000;
+      padding-top: 1mm;
+      margin-top: 2mm;
+    }
+    
+    .payment-info {
+      text-align: center;
+      margin: 2mm 0;
+      font-size: 11px;
+      font-weight: bold;
+      padding: 1mm;
+      background: #f0f0f0;
+    }
+    
+    .footer {
+      text-align: center;
+      margin-top: 3mm;
+      font-size: 10px;
+      border-top: 1px dashed #000;
+      padding-top: 2mm;
+    }
+    
+    .tear-line {
+      text-align: center;
+      margin: 3mm 0;
+      color: #999;
+      font-size: 9px;
+      letter-spacing: 2px;
+    }
+    
+    @media print {
+      body {
+        width: 80mm;
+        margin: 0;
+        padding: 0;
+      }
+      .receipt {
+        width: 80mm;
+        margin: 0;
+        padding: 5mm;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="receipt">
+    <!-- Header -->
+    <div class="header">
+      <div class="header-title">TICKET DE COMMANDE</div>
+      <div class="order-number">#${orderNumber}</div>
+      <div class="timestamp">${timestamp}</div>
+    </div>
+    
+    <!-- Customer Info -->
+    <div class="customer-info">
+      <div class="customer-name">${order.customer_name}</div>
+      <div class="customer-phone">📞 ${order.customer_phone}</div>
+    </div>
+    
+    <!-- Order Type Badge -->
+    <div class="order-type">${orderType}</div>
+    
+    <!-- Address if Delivery -->
+    ${addressHTML}
+    
+    <!-- Items -->
+    <div class="section-title">ARTICLES</div>
+    <div class="items">
+      ${itemsHTML}
+    </div>
+    
+    <!-- Notes if Present -->
+    ${notesHTML}
+    
+    <!-- Totals -->
+    <div class="totals">
+      <div class="total-row subtotal">
+        <span>Sous-total:</span>
+        <span>€${(order.total - (order.delivery_fee || 0)).toFixed(2)}</span>
       </div>
-    </body>
-    </html>
-  `
+      ${order.delivery_fee ? `<div class="total-row delivery">
+        <span>Frais de livraison:</span>
+        <span>€${Number(order.delivery_fee).toFixed(2)}</span>
+      </div>` : ''}
+      <div class="total-row final">
+        <span>TOTAL:</span>
+        <span>€${Number(order.total).toFixed(2)}</span>
+      </div>
+    </div>
+    
+    <!-- Payment Info -->
+    <div class="payment-info">${paymentStatus}</div>
+    
+    <!-- Scheduled Time if Present -->
+    ${order.scheduled_for ? `<div style="text-align: center; font-size: 11px; margin: 2mm 0; padding: 1mm; background: #fff3cd;">
+      <strong>Horaire prévu:</strong><br>
+      ${new Date(order.scheduled_for).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+    </div>` : ''}
+    
+    <!-- Footer -->
+    <div class="footer">
+      Merci pour votre commande!
+      <div class="tear-line">✂ ✂ ✂ ✂ ✂ ✂</div>
+    </div>
+  </div>
+</body>
+</html>`
 }

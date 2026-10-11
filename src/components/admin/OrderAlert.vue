@@ -134,9 +134,4 @@ function handleAccept() {
   // Emit the accept event
   emit('accept', prepTime.value)
 }
-</script>function handleAccept() {
-  // Print the receipt automatically
-  printOrderReceipt(props.order)
-  // Emit the accept event
-  emit('accept', prepTime.value)
-}
+</script>
