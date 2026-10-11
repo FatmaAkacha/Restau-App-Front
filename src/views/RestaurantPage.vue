@@ -409,16 +409,28 @@ const popularItems = computed(() =>
 )
 
 /**
- * Get ALL items - let modals do the filtering
- * Pass EVERYTHING to the modals so they can filter properly
+ * Get ONLY pizzas from the Pizza category
+ * Filter to only include items where category contains "pizza"
+ * Exclude promo offer items (Offre À emporter, Offre Livraison, etc.)
  */
 const availablePizzas = computed(() => {
   const allItems = []
   
   if (store.restaurant?.categories && Array.isArray(store.restaurant.categories)) {
     store.restaurant.categories.forEach(cat => {
-      if (cat.menu_items && Array.isArray(cat.menu_items)) {
-        allItems.push(...cat.menu_items)
+      // Check if this category is a Pizza category
+      const categoryName = (cat.name || '').toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+      
+      if (categoryName.includes('pizza') && cat.menu_items && Array.isArray(cat.menu_items)) {
+        // Filter out promo offer items
+        const pizzas = cat.menu_items.filter(item => {
+          const itemName = (item.name || '').toLowerCase()
+          // Exclude items that are promo offers
+          return !(itemName.includes('offre') && (itemName.includes('emporter') || itemName.includes('livraison')))
+        })
+        allItems.push(...pizzas)
       }
     })
   }
