@@ -167,6 +167,7 @@
                     v-for="item in group.items"
                     :key="item.id"
                     :item="item"
+                    :availablePizzas="availablePizzas"
                     @add="cartStore.addItem($event)"
                   />
                 </div>
@@ -240,6 +241,7 @@
                   v-for="item in cat.menu_items"
                   :key="item.id"
                   :item="item"
+                  :availablePizzas="availablePizzas"
                   @add="cartStore.addItem($event)"
                 />
               </div>
@@ -405,6 +407,34 @@ watch(checkoutNotes, (val) => {
 const popularItems = computed(() =>
   (store.restaurant?.popular_items || []).slice(0, 6)
 )
+
+/**
+ * Get all available pizzas from the restaurant menu
+ */
+const availablePizzas = computed(() => {
+  const pizzas = []
+  
+  if (store.restaurant?.categories) {
+    store.restaurant.categories.forEach(cat => {
+      if (cat.menu_items) {
+        const catPizzas = cat.menu_items.filter(item => 
+          item.name?.toLowerCase().includes('pizza') && item.is_available
+        )
+        pizzas.push(...catPizzas)
+      }
+    })
+  }
+  
+  if (store.restaurant?.popular_items) {
+    const popularPizzas = store.restaurant.popular_items.filter(item =>
+      item.name?.toLowerCase().includes('pizza') && item.is_available
+    )
+    pizzas.push(...popularPizzas)
+  }
+  
+  // Remove duplicates
+  return Array.from(new Map(pizzas.map(p => [p.id, p])).values())
+})
 
 const searchResults = computed(() => {
   const q = search.value.trim().toLowerCase()

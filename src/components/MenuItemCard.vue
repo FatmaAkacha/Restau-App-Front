@@ -68,10 +68,17 @@
       @add="onCustomized"
     />
 
-    <!-- Promo Pizza Selection Modal -->
-    <PromoPizzaSelectModal
-      :isOpen="showPromoModal"
-      :promoItem="item"
+    <!-- Promo Pizza Selection Modals (2 pizzas) -->
+    <PromoTwoPizzasModal
+      :isOpen="showPromoModal && isPromoType === 'two-pizzas'"
+      :availablePizzas="availablePizzas || []"
+      @close="showPromoModal = false"
+      @add="onPromoSelected"
+    />
+
+    <!-- Promo Pizza Selection Modals (3 pizzas) -->
+    <PromoThreePizzasModal
+      :isOpen="showPromoModal && isPromoType === 'three-pizzas'"
       :availablePizzas="availablePizzas || []"
       @close="showPromoModal = false"
       @add="onPromoSelected"
@@ -82,7 +89,8 @@
 <script setup>
 import { ref, computed } from 'vue'
 import CustomizeModal from '@/components/CustomizeModal.vue'
-import PromoPizzaSelectModal from '@/components/PromoPizzaSelectModal.vue'
+import PromoTwoPizzasModal from '@/components/PromoTwoPizzasModal.vue'
+import PromoThreePizzasModal from '@/components/PromoThreePizzasModal.vue'
 
 const props = defineProps({ 
   item: Object,
@@ -92,12 +100,24 @@ const emit  = defineEmits(['add'])
 
 const modalItem = ref(null)
 const showPromoModal = ref(false)
+const isPromoType = ref('') // 'two-pizzas' or 'three-pizzas'
 
 function handleClick() {
   if (!props.item.is_available) return
   
-  // Check if this is the 2-pizza promo item
-  if (props.item?.is_promo_item || props.item?.name?.includes('2 pizzas')) {
+  // Check if this is a pizza promo item (multiple pizzas)
+  const itemName = props.item?.name?.toLowerCase() || ''
+  const isPromo = props.item?.is_promo_item || 
+                  itemName.includes('2 pizzas') || 
+                  itemName.includes('pizza') && (itemName.includes('offerte') || itemName.includes('€'))
+  
+  if (isPromo && props.availablePizzas?.length > 0) {
+    // Determine which promo type: 2 pizzas or 3 pizzas
+    if (itemName.includes('3ème') || itemName.includes('3e') || itemName.includes('offerte')) {
+      isPromoType.value = 'three-pizzas'
+    } else {
+      isPromoType.value = 'two-pizzas'
+    }
     showPromoModal.value = true
   } else if (props.item?.customization_options?.length) {
     modalItem.value = props.item
