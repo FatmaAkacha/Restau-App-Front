@@ -409,31 +409,21 @@ const popularItems = computed(() =>
 )
 
 /**
- * Get all available pizzas from the restaurant menu
+ * Get ALL items - let modals do the filtering
+ * Pass EVERYTHING to the modals so they can filter properly
  */
 const availablePizzas = computed(() => {
-  const pizzas = []
+  const allItems = []
   
-  if (store.restaurant?.categories) {
+  if (store.restaurant?.categories && Array.isArray(store.restaurant.categories)) {
     store.restaurant.categories.forEach(cat => {
-      if (cat.menu_items) {
-        const catPizzas = cat.menu_items.filter(item => 
-          item.name?.toLowerCase().includes('pizza') && item.is_available
-        )
-        pizzas.push(...catPizzas)
+      if (cat.menu_items && Array.isArray(cat.menu_items)) {
+        allItems.push(...cat.menu_items)
       }
     })
   }
   
-  if (store.restaurant?.popular_items) {
-    const popularPizzas = store.restaurant.popular_items.filter(item =>
-      item.name?.toLowerCase().includes('pizza') && item.is_available
-    )
-    pizzas.push(...popularPizzas)
-  }
-  
-  // Remove duplicates
-  return Array.from(new Map(pizzas.map(p => [p.id, p])).values())
+  return allItems
 })
 
 const searchResults = computed(() => {

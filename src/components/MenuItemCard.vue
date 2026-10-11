@@ -71,6 +71,7 @@
     <!-- Promo Pizza Selection Modals (2 pizzas) -->
     <PromoTwoPizzasModal
       :isOpen="showPromoModal && isPromoType === 'two-pizzas'"
+      :promoItem="item"
       :availablePizzas="availablePizzas || []"
       @close="showPromoModal = false"
       @add="onPromoSelected"
@@ -79,6 +80,7 @@
     <!-- Promo Pizza Selection Modals (3 pizzas) -->
     <PromoThreePizzasModal
       :isOpen="showPromoModal && isPromoType === 'three-pizzas'"
+      :promoItem="item"
       :availablePizzas="availablePizzas || []"
       @close="showPromoModal = false"
       @add="onPromoSelected"
@@ -107,15 +109,20 @@ function handleClick() {
   
   // Check if this is a pizza promo item (multiple pizzas)
   const itemName = props.item?.name?.toLowerCase() || ''
+  
+  // Check for promo offers by looking for specific patterns
   const isPromo = props.item?.is_promo_item || 
-                  itemName.includes('2 pizzas') || 
-                  itemName.includes('pizza') && (itemName.includes('offerte') || itemName.includes('€'))
+                  itemName.includes('offre') ||
+                  (itemName.includes('pizza') && itemName.includes('€'))
   
   if (isPromo && props.availablePizzas?.length > 0) {
     // Determine which promo type: 2 pizzas or 3 pizzas
-    if (itemName.includes('3ème') || itemName.includes('3e') || itemName.includes('offerte')) {
+    // 3 pizzas offer: contains "3ème", "3e", or "offerte"
+    if (itemName.includes('3ème') || itemName.includes('3e') || 
+        (itemName.includes('offerte') && !itemName.includes('€3'))) {
       isPromoType.value = 'three-pizzas'
     } else {
+      // 2 pizzas offer: everything else
       isPromoType.value = 'two-pizzas'
     }
     showPromoModal.value = true

@@ -15,18 +15,19 @@
 
       <!-- Pizza Selection Grid -->
       <div class="px-6 py-6 bg-gray-50">
-        <div v-if="availablePizzas.length === 0" class="text-center py-12">
+        <div v-if="eligiblePizzas.length === 0" class="text-center py-12">
           <p class="text-gray-500 text-lg">Aucune pizza disponible</p>
         </div>
 
         <div v-else class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div
-            v-for="pizza in availablePizzas"
+            v-for="pizza in eligiblePizzas"
             :key="pizza.id"
             class="bg-white rounded-xl border-2 cursor-pointer transition-all hover:shadow-lg"
             :class="getSelectedBase(pizza.id) 
               ? 'border-green-400 shadow-md ring-2 ring-green-200' 
               : 'border-gray-200 hover:border-red-300'"
+            @click="togglePizzaSelection(pizza)"
           >
             <!-- Pizza Image -->
             <div class="h-40 bg-gray-200 overflow-hidden rounded-t-xl relative">
@@ -90,7 +91,8 @@
                 <span class="font-semibold text-gray-700">Pizza {{ idx + 1 }} :</span>
                 <span class="text-gray-600">{{ pizza.name }}</span>
                 <span v-if="pizza.base" class="ml-auto bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-xs font-semibold">
-                  {{ pizza.base === 'crème' ? '🍧' : '🍅' }} {{ pizza.base }}
+                  {{ pizza.base === 'crème' ? '🍧' : '🍅' }} {{ pizza.base
+                   }}
                 </span>
                 <span v-else class="ml-auto bg-yellow-100 text-yellow-700 px-2 py-1 rounded-full text-xs font-semibold">
                   ⚠️ Base requise
@@ -152,12 +154,15 @@
 
 <script setup>
 import { ref, computed, reactive } from 'vue'
-import restaurantService from '@/services/restaurantService'
 
 const props = defineProps({
   isOpen: {
     type: Boolean,
     required: true
+  },
+  promoItem: {
+    type: Object,
+    default: () => ({})
   },
   availablePizzas: {
     type: Array,
@@ -166,13 +171,11 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['close', 'add'])
-
 const loading = ref(false)
 const validationError = ref('')
 
 const selectedPizzas = reactive({})
 const firstPizzaPrice = ref(0)
-const secondPizzaPrice = ref(0)
 
 const selectedCount = computed(() => {
   return Object.values(selectedPizzas).filter(p => p.selected).length
@@ -185,6 +188,17 @@ const isSelected = (pizzaId) => {
 const getSelectedBase = (pizzaId) => {
   return selectedPizzas[pizzaId]?.base || null
 }
+
+// Filter to only display PIZZAS - exclude promo items
+// Get ALL pizzas from the Pizza category directly from store
+const eligiblePizzas = computed(() => {
+  if (!props.availablePizzas || props.availablePizzas.length === 0) {
+    return []
+  }
+  
+  // Return all available items
+  return props.availablePizzas.filter(item => item.is_available !== false)
+})
 
 function getImageUrl(path) {
   if (!path) return '/images/menu/pizza.png'
@@ -231,9 +245,6 @@ const recalculatePrices = () => {
 
   // 1st pizza at full price
   firstPizzaPrice.value = selectedList[0] || 0
-  
-  // 2nd pizza at €3.90 fixed price (SPECIAL OFFER)
-  secondPizzaPrice.value = selectedList.length >= 2 ? 3.90 : 0
 }
 
 const selectBase = (pizzaId, base) => {
@@ -317,8 +328,8 @@ const addToCart = async () => {
 const close = () => {
   Object.keys(selectedPizzas).forEach(key => delete selectedPizzas[key])
   firstPizzaPrice.value = 0
-  secondPizzaPrice.value = 0
   validationError.value = ''
   emit('close')
 }
 </script>
+

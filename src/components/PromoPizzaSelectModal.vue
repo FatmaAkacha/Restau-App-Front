@@ -15,14 +15,15 @@
 
       <!-- Pizza Selection Grid -->
       <div class="px-6 py-6 bg-gray-50">
-        <div v-if="availablePizzas.length === 0" class="text-center py-12">
+        <div v-if="eligiblePizzas.length === 0" class="text-center py-12">
           <p class="text-gray-500 text-lg">Aucune pizza disponible</p>
         </div>
 
         <div v-else class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div
-            v-for="pizza in availablePizzas"
+            v-for="pizza in eligiblePizzas"
             :key="pizza.id"
+            @click="togglePizzaSelection(pizza)"
             class="bg-white rounded-xl border-2 cursor-pointer transition-all hover:shadow-lg"
             :class="getSelectedBase(pizza.id) 
               ? 'border-green-400 shadow-md ring-2 ring-green-200' 
@@ -193,7 +194,6 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['close', 'add'])
-
 const loading = ref(false)
 const validationError = ref('')
 
@@ -282,6 +282,19 @@ const isSelected = (pizzaId) => {
 const getSelectedBase = (pizzaId) => {
   return selectedPizzas[pizzaId]?.base || null
 }
+
+/**
+ * Get all eligible pizzas for selection
+ * Filters to only show pizzas from the availablePizzas prop
+ */
+const eligiblePizzas = computed(() => {
+  if (!props.availablePizzas || props.availablePizzas.length === 0) {
+    return []
+  }
+  
+  // Return all available items
+  return props.availablePizzas.filter(item => item.is_available !== false)
+})
 
 /**
  * Toggle pizza selection
