@@ -1,0 +1,32 @@
+# Favicon and Manifest Configuration for Apache
+# Correctly serve favicon.ico with appropriate MIME type
+<FilesMatch "favicon\.ico$">
+  Header set Content-Type "image/x-icon"
+  Header set Cache-Control "public, max-age=31536000, immutable"
+</FilesMatch>
+
+# Serve manifest.json with correct MIME type
+<FilesMatch "manifest\.json$">
+  Header set Content-Type "application/manifest+json"
+  Header set Cache-Control "public, max-age=3600"
+</FilesMatch>
+
+# Cache busting for static assets
+<FilesMatch "\.(js|css|png|jpg|jpeg|gif|svg|woff|woff2|ttf|eot)$">
+  Header set Cache-Control "public, max-age=31536000, immutable"
+</FilesMatch>
+
+# Enable compression
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript application/json
+</IfModule>
+
+# Enable CORS for fonts
+<FilesMatch "\.(ttf|ttc|otf|eot|woff|woff2|font\.css)$">
+  Header set Access-Control-Allow-Origin "*"
+</FilesMatch>
+
+# Prevent directory listing
+<IfModule mod_autoindex.c>
+  Options -Indexes
+</IfModule>

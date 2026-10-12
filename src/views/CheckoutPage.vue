@@ -678,7 +678,7 @@ async function placeOrder() {
       // null = dès que possible
       // Strip milliseconds and timezone from ISO string for backend: 2026-10-12T17:00:00
       scheduled_time: timing.value === 'scheduled' 
-        ? new Date(scheduledFor.value).toISOString().split('.')[0]
+        ? new Date(scheduledFor.value).toISOString().slice(0, 19)
         : null,
 
       items: cart.items.map(i => ({
