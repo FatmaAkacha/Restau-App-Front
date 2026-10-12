@@ -18,11 +18,7 @@
         <span class="text-gray-900">€{{ baseFee.toFixed(2) }}</span>
       </div>
 
-      <!-- Distance Charge -->
-      <div class="flex items-center justify-between text-sm">
-        <span class="text-gray-600">Charge au km ({{ distance.toFixed(2) }} × €{{ perKmRate.toFixed(2) }})</span>
-        <span class="text-gray-900">€{{ (distance * perKmRate).toFixed(2) }}</span>
-      </div>
+
 
       <!-- Total Delivery Fee -->
       <div class="flex items-center justify-between text-base font-bold pt-2 border-t border-gray-300">
