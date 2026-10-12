@@ -343,9 +343,9 @@ function generateReceiptHTML(order) {
     <div class="payment-info">${paymentStatus}</div>
     
     <!-- Scheduled Time if Present -->
-    ${order.scheduled_for ? `<div style="text-align: center; font-size: 11px; margin: 2mm 0; padding: 1mm; background: #fff3cd;">
-      <strong>Horaire prévu:</strong><br>
-      ${new Date(order.scheduled_for).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+    ${order.scheduled_time ? `<div style="text-align: center; font-size: 11px; margin: 2mm 0; padding: 2mm; background: #fff3cd; border-left: 3px solid #D97706;">
+      <strong>📅 PROGRAMMÉE</strong><br>
+      <strong style="font-size: 13px;">Prévoir pour ${new Date(order.scheduled_time).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</strong>
     </div>` : ''}
     
     <!-- Footer -->

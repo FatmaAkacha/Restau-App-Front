@@ -143,7 +143,7 @@
                     <th class="px-3 md:px-5 py-2 md:py-3 text-left text-xs font-semibold uppercase" style="color:#888">Total</th>
                     <th class="px-3 md:px-5 py-2 md:py-3 text-left text-xs font-semibold uppercase" style="color:#888">Paiement</th>
                     <th class="px-3 md:px-5 py-2 md:py-3 text-left text-xs font-semibold uppercase" style="color:#888">Statut</th>
-                    <th class="px-3 md:px-5 py-2 md:py-3 text-left text-xs font-semibold uppercase" style="color:#888">Heure</th>
+                    <th class="px-3 md:px-5 py-2 md:py-3 text-left text-xs font-semibold uppercase" style="color:#888">Horaire</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -162,7 +162,14 @@
                     </td>
                     <td class="px-3 md:px-5 py-2 md:py-3"><PaymentBadge :status="order.payment_status" /></td>
                     <td class="px-3 md:px-5 py-2 md:py-3"><StatusBadge :status="order.status" /></td>
-                    <td class="px-3 md:px-5 py-2 md:py-3 text-xs" style="color:#AAA">{{ timeAgo(order.created_at) }}</td>
+                    <td class="px-3 md:px-5 py-2 md:py-3 text-xs" style="color:#AAA">
+                      <div v-if="order.scheduled_time" class="font-medium" style="color:#1A1A1A">
+                        🕒 {{ formatScheduledTime(order.scheduled_time) }}
+                      </div>
+                      <div v-else style="color:#AAA">
+                        {{ timeAgo(order.created_at) }}
+                      </div>
+                    </td>
                   </tr>
                   <tr v-if="filteredOrders.length === 0">
                     <td colspan="6" class="px-3 md:px-5 py-8 md:py-12 text-center text-xs md:text-sm" style="color:#AAA">
@@ -245,6 +252,12 @@ function timeAgo(dateStr) {
   if (diff < 60)   return `il y a ${diff}s`
   if (diff < 3600) return `il y a ${Math.floor(diff / 60)}min`
   return `il y a ${Math.floor(diff / 3600)}h`
+}
+
+function formatScheduledTime(dateStr) {
+  if (!dateStr) return ''
+  const date = new Date(dateStr)
+  return date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
 }
 
 let interval

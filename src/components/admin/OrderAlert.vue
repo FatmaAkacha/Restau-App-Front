@@ -67,14 +67,24 @@
       <!-- Notes -->
       <p v-if="order.notes" class="text-xs italic" style="color:#888">📝 {{ order.notes }}</p>
 
+      <!-- Scheduled Time Display -->
+      <div v-if="order.scheduled_time"
+           class="rounded-xl p-3 text-center border-2"
+           style="background:#FFF8E1; border-color:#FFC107">
+        <p class="text-xs font-medium" style="color:#F57F17">📅 HORAIRE PROGRAMMÉ</p>
+        <p class="text-lg md:text-xl font-bold mt-1" style="color:#F57F17">
+          {{ formatScheduledTime(order.scheduled_time) }}
+        </p>
+      </div>
+
       <!-- Temps de préparation -->
-      <div class="space-y-2 md:space-y-3 pt-1">
+      <div class="space-y-2 md:space-y-3 pt-1 border-t" style="border-color:#E5E5E5">
         <div>
-          <label class="text-xs font-medium block mb-1.5" style="color:#888">Temps de préparation</label>
+          <label class="text-xs font-medium block mb-2" style="color:#888">⏱ TEMPS DE PRÉPARATION</label>
           <div class="flex gap-1 md:gap-1.5 flex-wrap">
             <button v-for="t in [10,15,20,25,30,45]" :key="t"
                     @click="prepTime = t"
-                    class="flex-1 min-w-12 py-1.5 rounded-lg text-xs font-semibold border transition-all"
+                    class="flex-1 min-w-12 py-2 rounded-lg text-xs font-semibold border transition-all"
                     :style="prepTime === t
                       ? 'background:#E8192C; color:#fff; border-color:#E8192C'
                       : 'background:#fff; color:#555; border-color:#E5E5E5'">
@@ -127,6 +137,12 @@ const emit = defineEmits(['accept', 'reject'])
 const prepTime     = ref(20)
 const showReject   = ref(false)
 const rejectReason = ref('')
+
+function formatScheduledTime(dateStr) {
+  if (!dateStr) return ''
+  const date = new Date(dateStr)
+  return date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
+}
 
 function handleAccept() {
   // Print the receipt automatically

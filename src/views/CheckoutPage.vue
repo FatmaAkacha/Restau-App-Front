@@ -676,7 +676,10 @@ async function placeOrder() {
       delivery_fee: isDelivery ? deliveryFee.value : 0,
 
       // null = dès que possible
-      scheduled_for: timing.value === 'scheduled' ? scheduledFor.value : null,
+      // Strip milliseconds and timezone from ISO string for backend: 2026-10-12T17:00:00
+      scheduled_time: timing.value === 'scheduled' 
+        ? new Date(scheduledFor.value).toISOString().split('.')[0]
+        : null,
 
       items: cart.items.map(i => ({
         menu_item_id: i.id,
