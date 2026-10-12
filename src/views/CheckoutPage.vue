@@ -369,12 +369,36 @@ let nowTimer = null
 const leadMinutes = computed(() => LEAD_MINUTES[form.value.type] ?? 30)
 
 const timeSlots = computed(() => {
+  // Get restaurant operating hours
+  const operatingHours = restStore.restaurant?.operating_hours
+  if (!operatingHours) return []
+
+  const today = new Date(nowTick.value)
+  const dayName = today.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase()
+  const dayHours = operatingHours[dayName]
+
+  // If closed today, no slots
+  if (!dayHours || dayHours === false || dayHours === 'closed') return []
+
+  const openTime = dayHours.open || dayHours.opening_time
+  const closeTime = dayHours.close || dayHours.closing_time
+
+  if (!openTime || !closeTime) return []
+
+  // Parse opening/closing times
+  const [openHour, openMin] = openTime.split(':').map(Number)
+  const [closeHour, closeMin] = closeTime.split(':').map(Number)
+
+  const openDateTime = new Date(nowTick.value)
+  openDateTime.setHours(openHour, openMin, 0, 0)
+
+  const closeDateTime = new Date(nowTick.value)
+  closeDateTime.setHours(closeHour, closeMin, 0, 0)
+
   const earliest = nowTick.value + leadMinutes.value * 60000
-  const start = new Date(nowTick.value); start.setHours(OPENING.open, 0, 0, 0)
-  const end = new Date(nowTick.value);   end.setHours(OPENING.close, 0, 0, 0)
 
   const slots = []
-  for (let t = start.getTime(); t <= end.getTime(); t += SLOT_STEP_MIN * 60000) {
+  for (let t = openDateTime.getTime(); t < closeDateTime.getTime(); t += SLOT_STEP_MIN * 60000) {
     if (t >= earliest) {
       slots.push({
         value: new Date(t).toISOString(),
