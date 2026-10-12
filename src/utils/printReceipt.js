@@ -4,356 +4,423 @@
  */
 
 export function printOrderReceipt(order) {
-  const printWindow = window.open('', '', 'width=600,height=800')
-  
-  // Generate receipt HTML optimized for 80mm thermal printer
-  const html = generateReceiptHTML(order)
-  
-  printWindow.document.write(html)
-  printWindow.document.close()
-  
-  // Auto-print after content loads
-  printWindow.onload = () => {
-    printWindow.print()
-    // Close window after printing
-    setTimeout(() => printWindow.close(), 250)
+  const printWindow = window.open(
+    "",
+    "_blank",
+    "width=400,height=700"
+  );
+
+  if (!printWindow) {
+    alert("Veuillez autoriser les fenêtres pop-up pour imprimer.");
+    return;
   }
+
+  const html = generateReceiptHTML(order);
+
+  printWindow.document.open();
+  printWindow.document.write(html);
+  printWindow.document.close();
+
+  printWindow.onload = () => {
+    printWindow.focus();
+
+    setTimeout(() => {
+      printWindow.print();
+    }, 300);
+  };
+
+  // Fermer la fenêtre après l'impression
+  printWindow.onafterprint = () => {
+    printWindow.close();
+  };
 }
+
 
 /**
  * Generate receipt HTML formatted for 80mm width thermal printer
  * 80mm = ~30 characters per line at default font
  */
+
 function generateReceiptHTML(order) {
-  const timestamp = new Date(order.created_at).toLocaleString('fr-FR')
-  const orderNumber = String(order.id).padStart(5, '0')
-  
-  // Format items with quantities and notes
-  const itemsHTML = order.items.map(item => {
-    let itemLine = `<div class="item-line">
-      <span class="qty">${item.quantity}×</span>
-      <span class="name">${item.name}</span>
-      <span class="price">€${(item.price * item.quantity).toFixed(2)}</span>
-    </div>`
-    
-    if (item.customization_summary) {
-      itemLine += `<div class="item-detail">→ ${item.customization_summary}</div>`
-    }
-    
-    if (item.notes) {
-      itemLine += `<div class="item-note">📝 ${item.notes}</div>`
-    }
-    
-    return itemLine
-  }).join('')
-  
-  // Format order type and payment info
-  const orderType = order.type === 'delivery' ? 'LIVRAISON 🚚' : 'À EMPORTER 🏃'
-  const paymentStatus = order.payment_status === 'paid' 
-    ? 'PAIEMENT: ✅ PAYÉ'
-    : 'PAIEMENT: 💵 À LA RÉCEPTION'
-  
-  // Format address if delivery
-  const addressHTML = order.type === 'delivery' 
-    ? `<div class="section-title">ADRESSE DE LIVRAISON</div>
-       <div class="address">${order.delivery_address}</div>
-       <div class="divider">─────────────────────</div>`
-    : ''
-  
-  // Format notes if present
-  const notesHTML = order.notes 
-    ? `<div class="section-title">NOTES SPÉCIALES</div>
-       <div class="notes">${order.notes}</div>
-       <div class="divider">─────────────────────</div>`
-    : ''
-  
-  // Build complete receipt
+  const timestamp = new Date(
+    order.created_at || Date.now()
+  ).toLocaleString("fr-FR");
+
+  const orderNumber = String(order.id).padStart(5, "0");
+
+  // Échapper les caractères HTML pour éviter les erreurs
+  // si les noms ou les notes contiennent des caractères spéciaux.
+  const escapeHTML = (value) =>
+    String(value ?? "").replace(/[&<>"']/g, (char) => ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#39;"
+    })[char]);
+
+  const money = (value) =>
+    `${Number(value || 0).toFixed(2)} €`;
+
+  const separator = `<div class="separator">
+    --------------------------------
+  </div>`;
+
+  const itemsHTML = (order.items || []).map((item) => {
+    const quantity = Number(item.quantity || 0);
+    const total = Number(item.price || 0) * quantity;
+
+    return `
+      <div class="item">
+        <div class="item-name">
+          ${quantity} x ${escapeHTML(item.name)}
+        </div>
+        <div class="item-price">
+          ${money(total)}
+        </div>
+
+        ${
+          item.customization_summary
+            ? `<div class="detail">
+                ${escapeHTML(item.customization_summary)}
+              </div>`
+            : ""
+        }
+
+        ${
+          item.notes
+            ? `<div class="detail">
+                Note : ${escapeHTML(item.notes)}
+              </div>`
+            : ""
+        }
+      </div>
+    `;
+  }).join("");
+
+  const deliveryFee = Number(order.delivery_fee || 0);
+  const total = Number(order.total || 0);
+  const subtotal = total - deliveryFee;
+
+  const orderType =
+    order.type === "delivery"
+      ? "LIVRAISON"
+      : "A EMPORTER";
+
+  const paymentStatus =
+    order.payment_status === "paid"
+      ? "PAIEMENT : PAYE"
+      : "PAIEMENT : A LA RECEPTION";
+
   return `<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ticket de Commande #${orderNumber}</title>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    
-    body {
-      width: 80mm;
-      font-family: 'Courier New', monospace;
-      font-size: 12px;
-      background: white;
-      padding: 0;
-      margin: 0;
-    }
-    
-    .receipt {
-      width: 80mm;
-      padding: 5mm;
-      background: white;
-      color: black;
-    }
-    
-    .header {
-      text-align: center;
-      margin-bottom: 3mm;
-      border-bottom: 2px dashed #000;
-      padding-bottom: 3mm;
-    }
-    
-    .header-title {
-      font-size: 16px;
-      font-weight: bold;
-      margin-bottom: 2mm;
-    }
-    
-    .order-number {
-      font-size: 14px;
-      font-weight: bold;
-      letter-spacing: 2px;
-      margin: 2mm 0;
-    }
-    
-    .timestamp {
-      font-size: 10px;
-      color: #333;
-    }
-    
-    .customer-info {
-      margin: 3mm 0;
-      border-bottom: 1px solid #000;
-      padding-bottom: 2mm;
-    }
-    
-    .customer-name {
-      font-size: 13px;
-      font-weight: bold;
-      margin-bottom: 1mm;
-    }
-    
-    .customer-phone {
-      font-size: 11px;
-    }
-    
-    .order-type {
-      background: #000;
-      color: white;
-      padding: 2mm;
-      margin: 2mm 0;
-      text-align: center;
-      font-size: 13px;
-      font-weight: bold;
-    }
-    
-    .section-title {
-      font-size: 11px;
-      font-weight: bold;
-      text-transform: uppercase;
-      margin-top: 2mm;
-      margin-bottom: 1mm;
-      border-bottom: 1px solid #000;
-      padding-bottom: 1mm;
-    }
-    
-    .divider {
-      text-align: center;
-      margin: 1mm 0;
-      color: #666;
-    }
-    
-    .items {
-      margin: 2mm 0;
-      border-bottom: 2px solid #000;
-      padding-bottom: 2mm;
-    }
-    
-    .item-line {
-      display: grid;
-      grid-template-columns: 1fr 3fr 1fr;
-      gap: 2mm;
-      margin: 1mm 0;
-      align-items: baseline;
-      font-size: 12px;
-    }
-    
-    .qty {
-      font-weight: bold;
-      text-align: left;
-    }
-    
-    .name {
-      text-align: left;
-      word-wrap: break-word;
-      word-break: break-word;
-    }
-    
-    .price {
-      font-weight: bold;
-      text-align: right;
-    }
-    
-    .item-detail {
-      margin-left: 5mm;
-      font-size: 10px;
-      color: #333;
-      font-style: italic;
-    }
-    
-    .item-note {
-      margin-left: 5mm;
-      font-size: 10px;
-      color: #555;
-    }
-    
-    .address {
-      font-size: 11px;
-      margin-bottom: 1mm;
-      word-wrap: break-word;
-      word-break: break-word;
-      line-height: 1.4;
-    }
-    
-    .notes {
-      font-size: 11px;
-      margin-bottom: 1mm;
-      word-wrap: break-word;
-      word-break: break-word;
-      line-height: 1.4;
-    }
-    
-    .totals {
-      margin: 2mm 0;
-      border-top: 2px solid #000;
-      padding-top: 2mm;
-    }
-    
-    .total-row {
-      display: flex;
-      justify-content: space-between;
-      margin: 1mm 0;
-      font-size: 12px;
-    }
-    
-    .total-row.subtotal {
-      font-weight: normal;
-    }
-    
-    .total-row.delivery {
-      font-weight: normal;
-      font-size: 11px;
-    }
-    
-    .total-row.final {
-      font-size: 14px;
-      font-weight: bold;
-      border-top: 1px solid #000;
-      padding-top: 1mm;
-      margin-top: 2mm;
-    }
-    
-    .payment-info {
-      text-align: center;
-      margin: 2mm 0;
-      font-size: 11px;
-      font-weight: bold;
-      padding: 1mm;
-      background: #f0f0f0;
-    }
-    
-    .footer {
-      text-align: center;
-      margin-top: 3mm;
-      font-size: 10px;
-      border-top: 1px dashed #000;
-      padding-top: 2mm;
-    }
-    
-    .tear-line {
-      text-align: center;
-      margin: 3mm 0;
-      color: #999;
-      font-size: 9px;
-      letter-spacing: 2px;
-    }
-    
-    @media print {
-      body {
-        width: 80mm;
-        margin: 0;
-        padding: 0;
-      }
-      .receipt {
-        width: 80mm;
-        margin: 0;
-        padding: 5mm;
-      }
-    }
-  </style>
-</head>
-<body>
-  <div class="receipt">
-    <!-- Header -->
-    <div class="header">
-      <div class="header-title">TICKET DE COMMANDE</div>
-      <div class="order-number">#${orderNumber}</div>
-      <div class="timestamp">${timestamp}</div>
-    </div>
-    
-    <!-- Customer Info -->
-    <div class="customer-info">
-      <div class="customer-name">${order.customer_name}</div>
-      <div class="customer-phone">📞 ${order.customer_phone}</div>
-    </div>
-    
-    <!-- Order Type Badge -->
-    <div class="order-type">${orderType}</div>
-    
-    <!-- Address if Delivery -->
-    ${addressHTML}
-    
-    <!-- Items -->
-    <div class="section-title">ARTICLES</div>
-    <div class="items">
-      ${itemsHTML}
-    </div>
-    
-    <!-- Notes if Present -->
-    ${notesHTML}
-    
-    <!-- Totals -->
-    <div class="totals">
-      <div class="total-row subtotal">
-        <span>Sous-total:</span>
-        <span>€${(order.total - (order.delivery_fee || 0)).toFixed(2)}</span>
+  <html lang="fr">
+  <head>
+    <meta charset="UTF-8">
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1"
+    >
+
+    <title>Commande #${orderNumber}</title>
+
+    <style>
+
+@page {
+  size: 80mm auto;
+  margin: 0;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 80mm;
+  margin: 0 !important;
+  padding: 0 !important;
+  background: white;
+  color: black;
+}
+
+body {
+  font-family: "Courier New", monospace;
+  font-size: 12px;
+  line-height: 1.25;
+  font-weight: normal;
+}
+
+.receipt {
+  width: 72mm;
+  margin: 0;
+  padding: 3mm 2mm 5mm;
+}
+
+.header {
+  text-align: left;
+  border: none;
+  margin: 0 0 12px;
+  padding: 0;
+}
+
+.header-title {
+  font-size: 12px;
+  font-weight: normal;
+  margin-bottom: 0;
+}
+
+.order-number {
+  font-size: 12px;
+  font-weight: normal;
+  letter-spacing: 0;
+  margin: 0;
+}
+
+.timestamp {
+  font-size: 11px;
+  color: black;
+  margin-top: 5px;
+}
+
+.customer-info {
+  margin: 8px 0;
+  border: none;
+  padding: 0;
+}
+
+.customer-name,
+.customer-phone {
+  font-size: 12px;
+  font-weight: normal;
+  overflow-wrap: anywhere;
+}
+
+.order-type {
+  background: white;
+  color: black;
+  padding: 0;
+  margin: 8px 0;
+  text-align: left;
+  font-size: 12px;
+  font-weight: normal;
+}
+
+.section-title {
+  font-size: 12px;
+  font-weight: normal;
+  text-transform: none;
+  margin: 8px 0 4px;
+  padding: 0;
+  border: none;
+}
+
+.divider {
+  text-align: left;
+  margin: 6px 0;
+  color: black;
+}
+
+.items {
+  margin: 4px 0;
+  padding-bottom: 4px;
+  border-bottom: none;
+}
+
+.item-line {
+  display: block;
+  margin: 4px 0;
+  font-size: 12px;
+}
+
+.qty,
+.name,
+.price {
+  display: inline;
+  font-weight: normal;
+  text-align: left;
+}
+
+.item-detail,
+.item-note {
+  margin-left: 4mm;
+  font-size: 11px;
+  color: black;
+}
+
+.address,
+.notes {
+  font-size: 12px;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.totals {
+  margin: 8px 0;
+  padding-top: 0;
+  border-top: none;
+}
+
+.total-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 3mm;
+  margin: 4px 0;
+  font-size: 12px;
+}
+
+.total-row.final {
+  font-size: 12px;
+  font-weight: normal;
+  border-top: none;
+  padding-top: 0;
+  margin-top: 5px;
+}
+
+.payment-info {
+  background: white;
+  padding: 0;
+  text-align: left;
+  font-size: 12px;
+  font-weight: normal;
+}
+
+.footer {
+  text-align: left;
+  margin-top: 10px;
+  font-size: 11px;
+  border-top: none;
+  padding-top: 0;
+}
+
+.tear-line {
+  display: none;
+}
+
+@media print {
+  html,
+  body {
+    width: 80mm !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .receipt {
+    width: 72mm;
+    margin: 0;
+    padding: 2mm 2mm 4mm;
+  }
+}
+    </style>
+  </head>
+
+  <body>
+    <div class="receipt">
+
+      <div class="center">
+        <div class="title">TICKET DE COMMANDE</div>
+        <div class="order-number">N° ${orderNumber}</div>
+        <div class="timestamp">${escapeHTML(timestamp)}</div>
       </div>
-      ${order.delivery_fee ? `<div class="total-row delivery">
-        <span>Frais de livraison:</span>
-        <span>€${Number(order.delivery_fee).toFixed(2)}</span>
-      </div>` : ''}
-      <div class="total-row final">
-        <span>TOTAL:</span>
-        <span>€${Number(order.total).toFixed(2)}</span>
+
+      ${separator}
+
+      <div class="customer">
+        <strong>CLIENT :</strong>
+        ${escapeHTML(order.customer_name)}
       </div>
+
+      <div class="customer">
+        <strong>TEL :</strong>
+        ${escapeHTML(order.customer_phone)}
+      </div>
+
+      <div class="center" style="margin-top: 8px">
+        <strong>${orderType}</strong>
+      </div>
+
+      ${
+        order.type === "delivery"
+          ? `
+            ${separator}
+            <div class="section-title">
+              ADRESSE DE LIVRAISON
+            </div>
+            <div class="address">
+              ${escapeHTML(order.delivery_address)}
+            </div>
+          `
+          : ""
+      }
+
+      ${separator}
+
+      <div class="section-title">ARTICLES</div>
+
+      ${itemsHTML || "<div>Aucun article</div>"}
+
+      ${separator}
+
+      <div class="total-row">
+        <span>Sous-total :</span>
+        <span>${money(subtotal)}</span>
+      </div>
+
+      ${
+        deliveryFee > 0
+          ? `
+            <div class="total-row">
+              <span>Livraison :</span>
+              <span>${money(deliveryFee)}</span>
+            </div>
+          `
+          : ""
+      }
+
+      <div class="total-row grand-total">
+        <span>TOTAL :</span>
+        <span>${money(total)}</span>
+      </div>
+
+      ${separator}
+
+      <div class="payment">
+        ${paymentStatus}
+      </div>
+
+      ${
+        order.scheduled_time
+          ? `
+            <div class="scheduled">
+              COMMANDE PROGRAMMEE<br>
+              ${escapeHTML(
+                new Date(order.scheduled_time)
+                  .toLocaleTimeString("fr-FR", {
+                    hour: "2-digit",
+                    minute: "2-digit"
+                  })
+              )}
+            </div>
+          `
+          : ""
+      }
+
+      ${
+        order.notes
+          ? `
+            ${separator}
+            <div class="section-title">NOTES</div>
+            <div class="notes">${escapeHTML(order.notes)}</div>
+          `
+          : ""
+      }
+
+      ${separator}
+
+      <div class="footer">
+        Merci pour votre commande !
+      </div>
+
     </div>
-    
-    <!-- Payment Info -->
-    <div class="payment-info">${paymentStatus}</div>
-    
-    <!-- Scheduled Time if Present -->
-    ${order.scheduled_time ? `<div style="text-align: center; font-size: 11px; margin: 2mm 0; padding: 2mm; background: #fff3cd; border-left: 3px solid #D97706;">
-      <strong>📅 PROGRAMMÉE</strong><br>
-      <strong style="font-size: 13px;">Prévoir pour ${new Date(order.scheduled_time).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</strong>
-    </div>` : ''}
-    
-    <!-- Footer -->
-    <div class="footer">
-      Merci pour votre commande!
-      <div class="tear-line">✂ ✂ ✂ ✂ ✂ ✂</div>
-    </div>
-  </div>
-</body>
-</html>`
+  </body>
+  </html>`;
 }
